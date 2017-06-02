@@ -6,7 +6,7 @@ use Bonnier\WP\ClOauth\Admin\PostMetaBox;
 use Bonnier\WP\ClOauth\Http\Exceptions\HttpException;
 use Bonnier\WP\ClOauth\Models\User;
 use Exception;
-use Bonnier\WP\ClOauth\Services\ServiceOAuth;
+use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,7 +18,7 @@ class OauthLoginRoute
     /**
      * The namespace prefix.
      */
-    const PLUGIN_PREFIX = 'bp-wa-oauth';
+    const PLUGIN_PREFIX = 'bp-cl-oauth';
 
     /**
      * The namespace version.
@@ -43,17 +43,17 @@ class OauthLoginRoute
     /**
      * The access token cookie key.
      */
-    const ACCESS_TOKEN_COOKIE_KEY = 'bp_wa_oauth_token';
+    const ACCESS_TOKEN_COOKIE_KEY = 'bp_cl_oauth_token';
 
     /**
      * The auth destination cookie key.
      */
-    const AUTH_DESTINATION_COOKIE_KEY = 'bp_wa_oauth_auth_destination';
+    const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
 
     /* @var SettingsPage $settings */
     private $settings;
 
-    /* @var ServiceOAuth $service */
+    /* @var CommonLoginOAuth $service */
     private $service;
 
     /**
@@ -195,11 +195,12 @@ class OauthLoginRoute
         if(!$requiredRole) {
             $requiredRole = $this->settings->get_required_user_role($currentLocale);
         }
-
         $this->redirect(
-            $this->service->getLoginUrl(
-                $this->get_redirect_uri(),
-                $requiredRole)
+            $this->service->getAuthorizationUrl([
+                'clientId' => $this->settings->get_api_user($currentLocale),
+                'clientSecret' => $this->settings->get_api_secret($currentLocale),
+                'scopes' => ['user_read']
+            ])
         );
 
     }
@@ -223,8 +224,19 @@ class OauthLoginRoute
 
         } elseif ($request && $grantToken = $request->get_param('code')) {
 
-            $this->service->setGrantToken($redirectUri, $grantToken);
-            $this->persist_access_token($this->service->getAccessToken());
+            /*$this->persist_access_token(
+                $this->service->getAccessToken('authorization_code', [
+                    'code' => $grantToken
+                ])
+            )*/
+
+            $accessToken = $this->service->getAccessToken('authorization_code', [
+                'code' => $grantToken
+            ]);
+
+            $user = $this->service->getResourceOwner($accessToken);
+            dd($user->toArray());
+
         }
 
         return $this->service->getUser();
@@ -347,7 +359,7 @@ class OauthLoginRoute
     /**
      * Returns an instance of ServiceOauth
      *
-     * @return ServiceOAuth
+     * @return CommonLoginOAuth
      */
     private function get_oauth_service()
     {
@@ -357,10 +369,10 @@ class OauthLoginRoute
 
         $locale = $this->settings->get_current_locale();
 
-        return new ServiceOAuth(
-            $this->settings->get_api_user($locale),
-            $this->settings->get_api_secret($locale),
-            $this->settings->get_api_endpoint($locale)
-        );
+        return new CommonLoginOAuth([
+            'clientId' => $this->settings->get_api_user($locale),
+            'clientSecret' => $this->settings->get_api_secret($locale),
+            'scopes' => ['user_read']
+        ], $this->settings);
     }
 }

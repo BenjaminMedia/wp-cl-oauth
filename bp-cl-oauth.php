@@ -21,7 +21,7 @@ use Bonnier\WP\ClOauth\Settings\SettingsPage;
 if (!defined('ABSPATH')) {
     exit;
 }
-
+require_once (__DIR__.'/vendor/autoload.php');
 // Handle autoload so we can use namespaces
 spl_autoload_register(function ($className) {
     if (strpos($className, __NAMESPACE__) !== false) {
