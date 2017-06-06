@@ -102,8 +102,8 @@ class Plugin
     {
         if (!self::$instance) {
             self::$instance = new self;
-            global $bp_wa_oauth;
-            $bp_wa_oauth = self::$instance;
+            global $bp_cl_oauth;
+            $bp_cl_oauth = self::$instance;
             self::$instance->boostrap();
 
             /**
@@ -120,11 +120,12 @@ class Plugin
     }
 
     public function get_user() {
-        $waUser = $this->loginRoute->get_wa_user();
+        $commonLoginUser = $this->loginRoute->get_common_login_user();
+        dd($commonLoginUser);
         if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
-            return User::get_local_user($waUser);
+            return User::get_local_user($commonLoginUser);
         }
-        return $waUser;
+        return $commonLoginUser;
     }
 
 }

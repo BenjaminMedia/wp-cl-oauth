@@ -765,7 +765,6 @@ abstract class AbstractProvider
         $url = $this->getResourceOwnerDetailsUrl($token);
 
         $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
-
         return $this->getParsedResponse($request);
     }
 

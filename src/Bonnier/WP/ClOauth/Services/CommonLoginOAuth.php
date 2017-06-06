@@ -5,17 +5,28 @@ namespace Bonnier\WP\ClOauth\Services;
 use Bonnier\WP\ClOauth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use \League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\GenericResourceOwner;
 use \League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
 
 class CommonLoginOAuth extends AbstractProvider
 {
+    use BearerAuthorizationTrait;
+
     private $pluginInstance;
     private $baseAuthorizationUrl;
     private $accessToken;
     private $user;
+    protected $scopes = [ 'user_read' ];
+    private $responseError = 'error';
+    private $responseCode;
+    private $responseResourceOwnerId;
     protected $clientId;
     protected $appSecret;
+
+    const USER_IDENTIFIER = 'id';
 
     /**
      * @return mixed
@@ -79,6 +90,12 @@ class CommonLoginOAuth extends AbstractProvider
         $this->accessToken = $token;
     }
 
+    public function getCurrentAccessToken()
+    {
+        $options = ['access_token' => $this->accessToken];
+
+        return new AccessToken($options);
+    }
 
     /**
      * @param mixed $baseAuthorizationUrl
@@ -116,48 +133,42 @@ class CommonLoginOAuth extends AbstractProvider
         return $this->baseAuthorizationUrl.'token';
     }
 
+    public function getResourceOwnerDetailsUrl(AccessToken $token){
+        return $this->baseAuthorizationUrl.'user';
+    }
+
     /**
      * Get the currently signed in user.
      *
      * @return mixed
      * @throws Exception
      */
-    public function getUser()
+    public function getUser($accessToken)
     {
         if ($this->user !== null) {
             return $this->user;
         }
-
-        if ($this->accessToken) {
-
-            $response = $this->get('api/users/current.json', ['headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken
-            ]]);
-
-            if ($response->getStatusCode() == 200) {
-                $this->user = json_decode($response->getBody());
-            }
-        }
-
+        $this->user = $this->getResourceOwner($accessToken);
         return $this->user;
-    }
-
-    public function getResourceOwnerDetailsUrl(AccessToken $token){
-
     }
 
     protected function getDefaultScopes()
     {
-        // TODO: Implement getDefaultScopes() method.
+        return $this->scopes;
     }
 
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        // TODO: Implement checkResponse() method.
+        if (!empty($data[$this->responseError])) {
+            $error = $data[$this->responseError];
+            $code  = $this->responseCode ? $data[$this->responseCode] : 0;
+            throw new IdentityProviderException($error, $code, $data);
+        }
     }
 
     protected function createResourceOwner(array $response, AccessToken $token)
     {
-        // TODO: Implement createResourceOwner() method.
+        $this->responseResourceOwnerId = $response[self::USER_IDENTIFIER];
+        return new GenericResourceOwner($response, $this->responseResourceOwnerId);
     }
 }

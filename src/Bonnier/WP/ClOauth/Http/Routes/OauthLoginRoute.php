@@ -10,6 +10,7 @@ use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use WP_REST_Request;
 use WP_REST_Response;
+use League\OAuth2\Client\Token\AccessToken;
 
 class OauthLoginRoute
 {
@@ -102,24 +103,24 @@ class OauthLoginRoute
 
         // Get user from admin service
         try {
-            $waUser = $this->get_wa_user($request);
+            $commonLoginUser = $this->get_common_login_user($request);
         } catch (HttpException $e) {
             return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
         }
 
         // If the user is not logged in, we redirect to the login screen.
-        if (!$waUser) {
+        if (!$commonLoginUser) {
             $this->trigger_login_flow($postRequiredRole);
         }
 
         // Save the user locally if the create_local_user setting is on
         if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
 
-            User::create_local_user($waUser, $this->get_access_token());
+            User::create_local_user($commonLoginUser, $this->get_access_token());
 
             // Auto login local user if the auto_login_local_user setting is on
             if($this->settings->get_auto_login_local_user($this->settings->get_current_locale())) {
-                User::wp_login_user(User::get_local_user($waUser));
+                User::wp_login_user(User::get_local_user($commonLoginUser));
             }
         }
 
@@ -128,7 +129,7 @@ class OauthLoginRoute
 
         if (!$redirect) {
             // Redirect to user profile
-            $redirect = $waUser->url;
+            $redirect = $commonLoginUser->url;
         }
 
         $this->redirect($redirect);
@@ -148,7 +149,8 @@ class OauthLoginRoute
         }
 
         $this->service = $this->get_oauth_service();
-        if ($user = $this->get_wa_user()) {
+        dd($user = $this->get_common_login_user());
+        if ($user = $this->get_common_login_user()) {
             if($postId && !PostMetaBox::post_is_unlocked($postId)) {
                 $postRequiredRole = PostMetaBox::post_required_role($postId);
                 if(!empty($postRequiredRole) && !in_array($postRequiredRole, $user->roles)) {
@@ -212,7 +214,7 @@ class OauthLoginRoute
      * @return mixed
      * @throws Exception|HttpException
      */
-    public function get_wa_user($request = null)
+    public function get_common_login_user($request = null)
     {
         $this->service = $this->get_oauth_service();
 
@@ -221,25 +223,17 @@ class OauthLoginRoute
         if ($accessToken = $this->get_access_token()) {
 
             $this->service->setAccessToken($accessToken);
+            $this->set_access_token_cookie($accessToken);
 
         } elseif ($request && $grantToken = $request->get_param('code')) {
-
-            /*$this->persist_access_token(
-                $this->service->getAccessToken('authorization_code', [
-                    'code' => $grantToken
-                ])
-            )*/
 
             $accessToken = $this->service->getAccessToken('authorization_code', [
                 'code' => $grantToken
             ]);
-
-            $user = $this->service->getResourceOwner($accessToken);
-            dd($user->toArray());
-
+            $this->service->setAccessToken($accessToken);
+            $this->set_access_token_cookie($accessToken);
         }
-
-        return $this->service->getUser();
+        return $this->service->getUser($this->service->getCurrentAccessToken());
 
     }
 
@@ -279,7 +273,7 @@ class OauthLoginRoute
      *
      * @param $token
      */
-    private function persist_access_token($token)
+    private function set_access_token_cookie($token)
     {
         setcookie(self::ACCESS_TOKEN_COOKIE_KEY, $token, $this->get_access_token_lifetime(), '/');
     }
@@ -371,8 +365,7 @@ class OauthLoginRoute
 
         return new CommonLoginOAuth([
             'clientId' => $this->settings->get_api_user($locale),
-            'clientSecret' => $this->settings->get_api_secret($locale),
-            'scopes' => ['user_read']
+            'clientSecret' => $this->settings->get_api_secret($locale)
         ], $this->settings);
     }
 }
