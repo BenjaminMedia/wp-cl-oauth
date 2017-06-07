@@ -114,15 +114,14 @@ class OauthLoginRoute
         }
 
         // Save the user locally if the create_local_user setting is on
-        if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
-
+        /*if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
             User::create_local_user($commonLoginUser, $this->get_access_token());
 
             // Auto login local user if the auto_login_local_user setting is on
             if($this->settings->get_auto_login_local_user($this->settings->get_current_locale())) {
                 User::wp_login_user(User::get_local_user($commonLoginUser));
             }
-        }
+        }*/
 
         // Check if auth destination has been set
         $redirect = $this->get_auth_destination();
@@ -149,16 +148,20 @@ class OauthLoginRoute
         }
 
         $this->service = $this->get_oauth_service();
-        dd($user = $this->get_common_login_user());
-        if ($user = $this->get_common_login_user()) {
-            if($postId && !PostMetaBox::post_is_unlocked($postId)) {
-                $postRequiredRole = PostMetaBox::post_required_role($postId);
-                if(!empty($postRequiredRole) && !in_array($postRequiredRole, $user->roles)) {
-                    return false;
-                }
-            }
+        $user = $this->get_common_login_user();
+        if(isset($user)){
             return true;
         }
+
+        /*$wpUser = new User();
+        $wpUser->create_local_user($user, $this->service->getCurrentAccessToken()); no local users for us :> */
+        /*if($postId && !PostMetaBox::post_is_unlocked($postId)) {
+            $postRequiredRole = PostMetaBox::post_required_role($postId);
+            if(!empty($postRequiredRole) && !in_array($postRequiredRole, $user->roles)) {
+                return false;
+            }
+        }*/
+
         return false;
     }
 
@@ -216,24 +219,34 @@ class OauthLoginRoute
      */
     public function get_common_login_user($request = null)
     {
+        if($this->service->getCurrentAccessToken()){
+            $this->service->getUser();
+        }
+
         $this->service = $this->get_oauth_service();
 
         $redirectUri = $this->get_redirect_uri();
 
-        if ($accessToken = $this->get_access_token()) {
+        try{
+            if ($accessToken = $this->get_access_token()) {
 
-            $this->service->setAccessToken($accessToken);
-            $this->set_access_token_cookie($accessToken);
+                $this->service->setAccessToken($accessToken);
+                $this->set_access_token_cookie($accessToken);
 
-        } elseif ($request && $grantToken = $request->get_param('code')) {
+            } elseif ($request && $grantToken = $request->get_param('code')) {
 
-            $accessToken = $this->service->getAccessToken('authorization_code', [
-                'code' => $grantToken
-            ]);
-            $this->service->setAccessToken($accessToken);
-            $this->set_access_token_cookie($accessToken);
+                $accessToken = $this->service->getAccessToken('authorization_code', [
+                    'code' => $grantToken
+                ]);
+                $this->service->setAccessToken($accessToken);
+                $this->set_access_token_cookie($accessToken);
+            }
+        } catch(Exception $exception) {
+            if(is_user_admin()){
+                echo var_dump($exception);
+            }
         }
-        return $this->service->getUser($this->service->getCurrentAccessToken());
+        return $this->service->getUser();
 
     }
 
@@ -261,7 +274,7 @@ class OauthLoginRoute
     /**
      * Returns the persisted access token or false
      *
-     * @return string|bool
+     * @return AccessToken|bool
      */
     private function get_access_token()
     {

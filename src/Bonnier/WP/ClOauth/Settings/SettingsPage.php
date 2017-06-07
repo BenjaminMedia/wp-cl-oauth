@@ -30,18 +30,6 @@ class SettingsPage
             'type' => 'text',
             'name' => 'Authorization Url',
         ],
-        'global_enable' => [
-            'type' => 'checkbox',
-            'name' => 'Global Enable',
-        ],
-        'create_local_user' => [
-            'type' => 'checkbox',
-            'name' => 'Create local user',
-        ],
-        'auto_login_local_user' => [
-            'type' => 'checkbox',
-            'name' => 'Auto login local user',
-        ],
     ];
 
     /**
