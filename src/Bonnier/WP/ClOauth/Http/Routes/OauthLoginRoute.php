@@ -149,7 +149,7 @@ class OauthLoginRoute
 
         $this->service = $this->get_oauth_service();
         $user = $this->get_common_login_user();
-        if(isset($user)){
+        if($user){
             return true;
         }
 
@@ -232,6 +232,7 @@ class OauthLoginRoute
 
                 $this->service->setAccessToken($accessToken);
                 $this->set_access_token_cookie($accessToken);
+                return $this->service->getUser($this->service->getCurrentAccessToken());
 
             } elseif ($request && $grantToken = $request->get_param('code')) {
 
@@ -240,13 +241,15 @@ class OauthLoginRoute
                 ]);
                 $this->service->setAccessToken($accessToken);
                 $this->set_access_token_cookie($accessToken);
+                return $this->service->getUser($this->service->getCurrentAccessToken());
+
             }
         } catch(Exception $exception) {
             if(is_user_admin()){
                 echo var_dump($exception);
             }
         }
-        return $this->service->getUser();
+        return false;
 
     }
 

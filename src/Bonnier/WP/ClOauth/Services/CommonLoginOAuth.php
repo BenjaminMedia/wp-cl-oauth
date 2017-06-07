@@ -92,9 +92,11 @@ class CommonLoginOAuth extends AbstractProvider
 
     public function getCurrentAccessToken()
     {
-        $options = ['access_token' => $this->accessToken];
-
-        return new AccessToken($options);
+        if(isset($this->accessToken)){
+            $options = ['access_token' => $this->accessToken];
+            return new AccessToken($options);
+        }
+        return false;
     }
 
     /**
@@ -143,13 +145,21 @@ class CommonLoginOAuth extends AbstractProvider
      * @return mixed
      * @throws Exception
      */
-    public function getUser($accessToken)
+    public function getUser($accessToken = false)
     {
         if ($this->user !== null) {
             return $this->user;
         }
-        $this->user = $this->getResourceOwner($accessToken);
-        return $this->user;
+        if($this->getCurrentAccessToken()){
+            $this->user = $this->getResourceOwner($this->getCurrentAccessToken());
+            return $this->user;
+        }
+        if(isset($accessToken)){
+            $this->user = $this->getResourceOwner($accessToken);
+            return $this->user;
+        }
+
+        return false;
     }
 
     protected function getDefaultScopes()
@@ -166,9 +176,10 @@ class CommonLoginOAuth extends AbstractProvider
         }
     }
 
-    protected function createResourceOwner(array $response, AccessToken $token)
+    public function createResourceOwner(array $response, AccessToken $token)
     {
         $this->responseResourceOwnerId = $response[self::USER_IDENTIFIER];
-        return new GenericResourceOwner($response, $this->responseResourceOwnerId);
+
+        return $response;
     }
 }
