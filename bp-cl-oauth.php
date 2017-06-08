@@ -109,14 +109,14 @@ class Plugin
             /**
              * Run after the plugin has been loaded.
              */
-            do_action('bp_wa_oauth_loaded');
+            do_action('bp_cl_oauth_loaded');
         }
 
         return self::$instance;
     }
 
     public function is_authenticated($postId = null) {
-        return $this->loginRoute->is_authenticated($postId = null);
+        return $this->loginRoute->is_authenticated($postId);
     }
 
     public function get_user() {
