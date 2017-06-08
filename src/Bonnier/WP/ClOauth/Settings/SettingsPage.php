@@ -187,11 +187,6 @@ class SettingsPage
         if (isset($this->settingsValues[$settingKey]) && !empty($this->settingsValues[$settingKey])) {
             return $this->settingsValues[$settingKey];
         }
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 19c15b2d21a02a58b0cb6abc8da4b895296de008
         return false;
     }
 
