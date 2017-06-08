@@ -122,8 +122,7 @@ class Plugin
     }
 
     public function get_user() {
-        $commonLoginUser = $this->loginRoute->get_common_login_user();
-        return (isset($commonLoginUser))? $commonLoginUser : false;
+        return $this->loginRoute->get_common_login_user();
     }
 
 }
