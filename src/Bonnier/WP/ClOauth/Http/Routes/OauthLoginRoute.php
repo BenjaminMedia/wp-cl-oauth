@@ -128,7 +128,7 @@ class OauthLoginRoute
 
         if (!$redirect) {
             // Redirect to user profile
-            $redirect = $commonLoginUser->url;
+            $redirect = home_url('/');
         }
 
         $this->redirect($redirect);
@@ -201,11 +201,8 @@ class OauthLoginRoute
             $requiredRole = $this->settings->get_required_user_role($currentLocale);
         }
         $this->redirect(
-            $this->service->getAuthorizationUrl([
-                'clientId' => $this->settings->get_api_user($currentLocale),
-                'clientSecret' => $this->settings->get_api_secret($currentLocale),
-                'scopes' => ['user_read']
-            ])
+
+            $this->service->getAuthorizationUrl()
         );
 
     }
@@ -219,11 +216,11 @@ class OauthLoginRoute
      */
     public function get_common_login_user($request = null)
     {
+        $this->service = $this->get_oauth_service();
+
         if($this->service->getCurrentAccessToken()){
             $this->service->getUser();
         }
-
-        $this->service = $this->get_oauth_service();
 
         $redirectUri = $this->get_redirect_uri();
 
@@ -381,7 +378,8 @@ class OauthLoginRoute
 
         return new CommonLoginOAuth([
             'clientId' => $this->settings->get_api_user($locale),
-            'clientSecret' => $this->settings->get_api_secret($locale)
+            'clientSecret' => $this->settings->get_api_secret($locale),
+            'scopes' => []
         ], $this->settings);
     }
 }

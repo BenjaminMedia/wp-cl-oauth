@@ -66,13 +66,6 @@ class CommonLoginOAuth extends AbstractProvider
      */
     public function __construct(array $options = [], $settings)
     {
-        if(isset($options['clientId'])){
-            $this->clientId = $options['clientId'];
-        }
-
-        if(isset($options['clientSecret'])){
-            $this->clientSecret = $options['clientSecret'];
-        }
 
         $this->pluginInstance = ClOauth\instance();
 
