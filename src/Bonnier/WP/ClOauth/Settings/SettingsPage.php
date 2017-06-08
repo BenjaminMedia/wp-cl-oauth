@@ -187,10 +187,7 @@ class SettingsPage
         if (isset($this->settingsValues[$settingKey]) && !empty($this->settingsValues[$settingKey])) {
             return $this->settingsValues[$settingKey];
         }
-
-        if($settingKey == 'api_endpoint'){
-            dd($this->settingsValues[$settingKey]);
-        }
+        
         return false;
     }
 
