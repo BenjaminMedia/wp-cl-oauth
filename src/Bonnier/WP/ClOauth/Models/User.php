@@ -7,13 +7,13 @@ use WP_User;
 
 class User
 {
-    const ACCESS_TOKEN_META_KEY = 'bp_wa_oauth_access_token';
-    const ON_USER_UPDATE_HOOK = 'bp_wa_oauth_on_user_update';
+    const ACCESS_TOKEN_META_KEY = 'bp_cl_oauth_access_token';
+    const ON_USER_UPDATE_HOOK = 'bp_cl_oauth_on_user_update';
 
     public static function get_local_user_id($waId) {
         global $wpdb;
         return $wpdb->get_var(
-            $wpdb->prepare("SELECT user_id FROM wp_usermeta WHERE meta_key=%s AND meta_value=%d", 'wa_user_id', $waId)
+            $wpdb->prepare("SELECT user_id FROM wp_usermeta WHERE meta_key=%s AND meta_value=%d", 'cl_user_id', $waId)
         );
     }
 
@@ -49,33 +49,36 @@ class User
         return update_user_meta($userId, self::ACCESS_TOKEN_META_KEY, $value);
     }
 
-    public static function create_local_user($waUser, $accessToken) {
+    public static function create_local_user($commonLoginUser, $accessToken) {
 
-        $localUser = static::get_local_user($waUser);
+        $localUser = static::get_local_user($commonLoginUser);
 
-        $localUser = self::set_user_props($localUser, $waUser);
+        $localUser = self::set_user_props($localUser, $commonLoginUser);
 
         $userId = wp_insert_user($localUser);
 
         // We have to update the user nicename because wp appends -2 when we call wp_insert_user
-        self::update_user_nicename($userId, $waUser->username);
+        self::update_user_nicename($userId, $commonLoginUser->username);
 
         self::set_access_token($userId, $accessToken);
 
-        update_user_meta($userId, 'wa_user_id', $waUser->id);
+        update_user_meta($userId, 'wa_user_id', $commonLoginUser->id);
 
-        self::update_local_user($userId, $waUser);
+        self::update_local_user($userId, $commonLoginUser);
     }
 
     /**
-     * @param $waUser
+     * @param $commonLoginUser
      *
      * @return WP_User|null
      */
-    public static function get_local_user($waUser) {
-        $localUser = new WP_User(self::get_local_user_id($waUser->id));
-        if(!$localUser->exists()) { // check if user can be found by email
-            $localUser = new WP_User(self::get_user_id_from_email($waUser->email));
+    public static function get_local_user($commonLoginUser) {
+        $localUser = null;
+        $localUser = new WP_User(self::get_local_user_id($commonLoginUser['id']));
+        if(!isset($localUser) || !$localUser->exists()) { // check if user can be found by email
+            if(isset($commonLoginUser['email'])) {
+                $localUser = new WP_User(self::get_user_id_from_email($commonLoginUser['id']));
+            }
         }
         return $localUser ?: null;
     }
@@ -89,13 +92,13 @@ class User
         return false;
     }
 
-    public static function update_local_user($localUserId, $waUser)
+    public static function update_local_user($localUserId, $commonLoginUser)
     {
         $localUser = new WP_User($localUserId);
 
         if($localUser->exists()) {
 
-            $localUser = self::set_user_props($localUser, $waUser);
+            $localUser = self::set_user_props($localUser, $commonLoginUser);
 
             // if a user's login is not already found in the database, we'll update the current one to the one in the $localUser object.
             $updated = wp_update_user($localUser) && self::update_user_login($localUser, $localUser->user_login);
@@ -105,23 +108,29 @@ class User
         return false;
     }
 
-    private static function set_user_props(WP_User $localUser, $waUser) {
-        
-        $localUser->user_login = sanitize_user($waUser->username);
-        $localUser->first_name = $waUser->first_name;
-        $localUser->last_name = $waUser->last_name;
-        $localUser->user_nicename = $waUser->username;
-        $localUser->display_name = $waUser->username;
-        $localUser->nickname = $waUser->username;
-        $localUser->user_url = $waUser->url;
-        $localUser->user_email = $waUser->email;
+    private static function set_user_props(WP_User $localUser, $commonLoginUser) {
+        $localUser->user_login = sanitize_user($commonLoginUser->username);
+        $localUser->first_name = $commonLoginUser->first_name;
+        $localUser->last_name = $commonLoginUser->last_name;
+        $localUser->user_nicename = $commonLoginUser->username;
+        $localUser->display_name = $commonLoginUser->username;
+        $localUser->nickname = $commonLoginUser->username;
+        $localUser->user_url = $commonLoginUser->url;
+        $localUser->user_email = $commonLoginUser->email;
+
+        /*foreach($localUser as $property => $value){
+            if(!property_exists($localUser, $property)){
+                return;
+            }
+            dd($localUser);
+        }*/
 
         // Password is required when creating a new user
         if(! $localUser->exists()) {
-            $localUser->user_pass = md5($waUser->username . time());
+            $localUser->user_pass = md5($commonLoginUser->username . time());
         }
 
-        $localUser = self::set_user_roles($localUser, $waUser->roles);
+        $localUser = self::set_user_roles($localUser, $commonLoginUser->roles);
 
         /*
          * this filter is for if you want to insert data into the description field,
@@ -130,7 +139,7 @@ class User
          */
         $localUser = apply_filters(self::ON_USER_UPDATE_HOOK, [
             'wp' => $localUser,
-            'wa' => $waUser
+            'cl' => $commonLoginUser
         ]);
 
         if ( $localUser instanceof WP_User ) {

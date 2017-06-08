@@ -6,10 +6,11 @@ use Bonnier\WP\ClOauth\Admin\PostMetaBox;
 use Bonnier\WP\ClOauth\Http\Exceptions\HttpException;
 use Bonnier\WP\ClOauth\Models\User;
 use Exception;
-use Bonnier\WP\ClOauth\Services\ServiceOAuth;
+use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use WP_REST_Request;
 use WP_REST_Response;
+use League\OAuth2\Client\Token\AccessToken;
 
 class OauthLoginRoute
 {
@@ -18,7 +19,7 @@ class OauthLoginRoute
     /**
      * The namespace prefix.
      */
-    const PLUGIN_PREFIX = 'bp-wa-oauth';
+    const PLUGIN_PREFIX = 'bp-cl-oauth';
 
     /**
      * The namespace version.
@@ -43,17 +44,17 @@ class OauthLoginRoute
     /**
      * The access token cookie key.
      */
-    const ACCESS_TOKEN_COOKIE_KEY = 'bp_wa_oauth_token';
+    const ACCESS_TOKEN_COOKIE_KEY = 'bp_cl_oauth_token';
 
     /**
      * The auth destination cookie key.
      */
-    const AUTH_DESTINATION_COOKIE_KEY = 'bp_wa_oauth_auth_destination';
+    const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
 
     /* @var SettingsPage $settings */
     private $settings;
 
-    /* @var ServiceOAuth $service */
+    /* @var CommonLoginOAuth $service */
     private $service;
 
     /**
@@ -102,33 +103,32 @@ class OauthLoginRoute
 
         // Get user from admin service
         try {
-            $waUser = $this->get_wa_user($request);
+            $commonLoginUser = $this->get_common_login_user($request);
         } catch (HttpException $e) {
             return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
         }
 
         // If the user is not logged in, we redirect to the login screen.
-        if (!$waUser) {
+        if (!$commonLoginUser) {
             $this->trigger_login_flow($postRequiredRole);
         }
 
         // Save the user locally if the create_local_user setting is on
-        if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
-
-            User::create_local_user($waUser, $this->get_access_token());
+        /*if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
+            User::create_local_user($commonLoginUser, $this->get_access_token());
 
             // Auto login local user if the auto_login_local_user setting is on
             if($this->settings->get_auto_login_local_user($this->settings->get_current_locale())) {
-                User::wp_login_user(User::get_local_user($waUser));
+                User::wp_login_user(User::get_local_user($commonLoginUser));
             }
-        }
+        }*/
 
         // Check if auth destination has been set
         $redirect = $this->get_auth_destination();
 
         if (!$redirect) {
             // Redirect to user profile
-            $redirect = $waUser->url;
+            $redirect = home_url('/');
         }
 
         $this->redirect($redirect);
@@ -148,15 +148,20 @@ class OauthLoginRoute
         }
 
         $this->service = $this->get_oauth_service();
-        if ($user = $this->get_wa_user()) {
-            if($postId && !PostMetaBox::post_is_unlocked($postId)) {
-                $postRequiredRole = PostMetaBox::post_required_role($postId);
-                if(!empty($postRequiredRole) && !in_array($postRequiredRole, $user->roles)) {
-                    return false;
-                }
-            }
+        $user = $this->get_common_login_user();
+        if($user){
             return true;
         }
+
+        /*$wpUser = new User();
+        $wpUser->create_local_user($user, $this->service->getCurrentAccessToken()); no local users for us :> */
+        /*if($postId && !PostMetaBox::post_is_unlocked($postId)) {
+            $postRequiredRole = PostMetaBox::post_required_role($postId);
+            if(!empty($postRequiredRole) && !in_array($postRequiredRole, $user->roles)) {
+                return false;
+            }
+        }*/
+
         return false;
     }
 
@@ -195,11 +200,9 @@ class OauthLoginRoute
         if(!$requiredRole) {
             $requiredRole = $this->settings->get_required_user_role($currentLocale);
         }
-
         $this->redirect(
-            $this->service->getLoginUrl(
-                $this->get_redirect_uri(),
-                $requiredRole)
+
+            $this->service->getAuthorizationUrl()
         );
 
     }
@@ -211,23 +214,39 @@ class OauthLoginRoute
      * @return mixed
      * @throws Exception|HttpException
      */
-    public function get_wa_user($request = null)
+    public function get_common_login_user($request = null)
     {
         $this->service = $this->get_oauth_service();
 
-        $redirectUri = $this->get_redirect_uri();
-
-        if ($accessToken = $this->get_access_token()) {
-
-            $this->service->setAccessToken($accessToken);
-
-        } elseif ($request && $grantToken = $request->get_param('code')) {
-
-            $this->service->setGrantToken($redirectUri, $grantToken);
-            $this->persist_access_token($this->service->getAccessToken());
+        if($this->service->getCurrentAccessToken()){
+            $this->service->getUser();
         }
 
-        return $this->service->getUser();
+        $redirectUri = $this->get_redirect_uri();
+
+        try{
+            if ($accessToken = $this->get_access_token()) {
+
+                $this->service->setAccessToken($accessToken);
+                $this->set_access_token_cookie($accessToken);
+                return $this->service->getUser($this->service->getCurrentAccessToken());
+
+            } elseif ($request && $grantToken = $request->get_param('code')) {
+
+                $accessToken = $this->service->getAccessToken('authorization_code', [
+                    'code' => $grantToken
+                ]);
+                $this->service->setAccessToken($accessToken);
+                $this->set_access_token_cookie($accessToken);
+                return $this->service->getUser($this->service->getCurrentAccessToken());
+
+            }
+        } catch(Exception $exception) {
+            if(is_user_admin()){
+                echo var_dump($exception);
+            }
+        }
+        return false;
 
     }
 
@@ -255,7 +274,7 @@ class OauthLoginRoute
     /**
      * Returns the persisted access token or false
      *
-     * @return string|bool
+     * @return AccessToken|bool
      */
     private function get_access_token()
     {
@@ -267,7 +286,7 @@ class OauthLoginRoute
      *
      * @param $token
      */
-    private function persist_access_token($token)
+    private function set_access_token_cookie($token)
     {
         setcookie(self::ACCESS_TOKEN_COOKIE_KEY, $token, $this->get_access_token_lifetime(), '/');
     }
@@ -347,7 +366,7 @@ class OauthLoginRoute
     /**
      * Returns an instance of ServiceOauth
      *
-     * @return ServiceOAuth
+     * @return CommonLoginOAuth
      */
     private function get_oauth_service()
     {
@@ -357,10 +376,10 @@ class OauthLoginRoute
 
         $locale = $this->settings->get_current_locale();
 
-        return new ServiceOAuth(
-            $this->settings->get_api_user($locale),
-            $this->settings->get_api_secret($locale),
-            $this->settings->get_api_endpoint($locale)
-        );
+        return new CommonLoginOAuth([
+            'clientId' => $this->settings->get_api_user($locale),
+            'clientSecret' => $this->settings->get_api_secret($locale),
+            'scopes' => []
+        ], $this->settings);
     }
 }

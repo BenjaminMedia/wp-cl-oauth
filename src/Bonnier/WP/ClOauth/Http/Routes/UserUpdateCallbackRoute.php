@@ -4,7 +4,7 @@ namespace Bonnier\WP\ClOauth\Http\Routes;
 
 use Bonnier\WP\ClOauth\Http\Exceptions\HttpException;
 use Bonnier\WP\ClOauth\Models\User;
-use Bonnier\WP\ClOauth\Services\ServiceOAuth;
+use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -36,7 +36,7 @@ class UserUpdateCallbackRoute
     /* @var SettingsPage $settings */
     private $settings;
 
-    /* @var ServiceOAuth $service */
+    /* @var CommonLoginOAuth $service */
     private $service;
 
     /**
@@ -112,7 +112,7 @@ class UserUpdateCallbackRoute
     /**
      * Returns an instance of ServiceOauth
      *
-     * @return ServiceOAuth
+     * @return CommonLoginOAuth
      */
     private function get_oauth_service()
     {
@@ -122,7 +122,7 @@ class UserUpdateCallbackRoute
 
         $locale = $this->settings->get_current_locale();
 
-        return new ServiceOAuth(
+        return new CommonLoginOAuth(
             $this->settings->get_api_user($locale),
             $this->settings->get_api_secret($locale),
             $this->settings->get_api_endpoint($locale)

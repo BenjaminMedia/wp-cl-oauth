@@ -15,7 +15,7 @@ class Scripts
     {
         $plugin = ClOauth\instance();
 
-        $script_src = $plugin->plugin_url . 'js/bp-wa-oauth-login.js';
+        $script_src = $plugin->plugin_url . 'js/bp-cl-oauth-login.js';
 
         wp_enqueue_script('bp-wa-oauth-login', $script_src);
     }
