@@ -173,7 +173,7 @@ class CommonLoginOAuth extends AbstractProvider
     {
         $this->responseResourceOwnerId = $response[self::USER_IDENTIFIER];
         $this->user = new \stdClass();
-        foreach($response as $property => $value){
+        foreach($response as $property => $value) {
             $this->user->$property = $value;
         }
 
