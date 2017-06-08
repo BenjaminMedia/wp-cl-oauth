@@ -21,7 +21,7 @@ use Bonnier\WP\ClOauth\Settings\SettingsPage;
 if (!defined('ABSPATH')) {
     exit;
 }
-
+require_once (__DIR__.'/includes/vendor/autoload.php');
 // Handle autoload so we can use namespaces
 spl_autoload_register(function ($className) {
     if (strpos($className, __NAMESPACE__) !== false) {
@@ -39,6 +39,8 @@ class Plugin
      * Text domain for translators
      */
     const TEXT_DOMAIN = 'bp-cl-oauth';
+
+    const PURCHASE_MANAGER_URL = 'https://services.bonnier.cloud/pm';
 
     const CLASS_DIR = 'src';
 
@@ -102,8 +104,8 @@ class Plugin
     {
         if (!self::$instance) {
             self::$instance = new self;
-            global $bp_wa_oauth;
-            $bp_wa_oauth = self::$instance;
+            global $bp_cl_oauth;
+            $bp_cl_oauth = self::$instance;
             self::$instance->boostrap();
 
             /**
@@ -120,11 +122,8 @@ class Plugin
     }
 
     public function get_user() {
-        $waUser = $this->loginRoute->get_wa_user();
-        if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
-            return User::get_local_user($waUser);
-        }
-        return $waUser;
+        $commonLoginUser = $this->loginRoute->get_common_login_user();
+        return (isset($commonLoginUser))? $commonLoginUser : false;
     }
 
 }

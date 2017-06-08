@@ -3,7 +3,7 @@
 namespace Bonnier\WP\ClOauth\Settings;
 
 use Exception;
-use Bonnier\WP\ClOauth\Services\ServiceOAuth;
+use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use PLL_Language;
 
 class SettingsPage
@@ -29,23 +29,6 @@ class SettingsPage
         'api_endpoint' => [
             'type' => 'text',
             'name' => 'Authorization Url',
-        ],
-        'global_enable' => [
-            'type' => 'checkbox',
-            'name' => 'Global Enable',
-        ],
-        'user_role' => [
-            'type' => 'select',
-            'name' => 'User Role Required',
-            'options_callback' => 'get_wa_user_roles'
-        ],
-        'create_local_user' => [
-            'type' => 'checkbox',
-            'name' => 'Create local user',
-        ],
-        'auto_login_local_user' => [
-            'type' => 'checkbox',
-            'name' => 'Auto login local user',
         ],
     ];
 
@@ -192,6 +175,7 @@ class SettingsPage
 
     public function get_setting_value($settingKey, $locale = null)
     {
+
         if(!$this->settingsValues) {
             $this->settingsValues = get_option(self::SETTINGS_KEY);
         }
@@ -203,7 +187,11 @@ class SettingsPage
         if (isset($this->settingsValues[$settingKey]) && !empty($this->settingsValues[$settingKey])) {
             return $this->settingsValues[$settingKey];
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 19c15b2d21a02a58b0cb6abc8da4b895296de008
         return false;
     }
 
@@ -303,24 +291,6 @@ class SettingsPage
 
         return [];
 
-    }
-
-    public function get_wa_user_roles($locale = null)
-    {
-        $service = new ServiceOAuth(
-            $this->get_api_user($locale),
-            $this->get_api_secret($locale),
-            $this->get_api_endpoint($locale)
-        );
-
-        try {
-            $userRoles = $service->getUserRoleList();
-            $this->create_wp_user_roles($userRoles);
-            return $userRoles;
-        } catch (Exception $e) {
-            $this->print_error('Failed fetching user roles: ' . $e->getMessage());
-            return false;
-        }
     }
 
     private function create_settings_field($field, $fieldKey)
