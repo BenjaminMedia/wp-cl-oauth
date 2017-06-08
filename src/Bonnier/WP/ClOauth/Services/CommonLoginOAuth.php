@@ -179,7 +179,11 @@ class CommonLoginOAuth extends AbstractProvider
     public function createResourceOwner(array $response, AccessToken $token)
     {
         $this->responseResourceOwnerId = $response[self::USER_IDENTIFIER];
+        $this->user = new \stdClass();
+        foreach($response as $property => $value){
+            $this->user->$property = $value;
+        }
 
-        return $response;
+        return $this->user;
     }
 }

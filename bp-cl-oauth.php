@@ -123,10 +123,7 @@ class Plugin
 
     public function get_user() {
         $commonLoginUser = $this->loginRoute->get_common_login_user();
-        if($this->settings->get_create_local_user($this->settings->get_current_locale())) {
-            return User::get_local_user($commonLoginUser);
-        }
-        return $commonLoginUser;
+        return (isset($commonLoginUser))? $commonLoginUser : false;
     }
 
 }
