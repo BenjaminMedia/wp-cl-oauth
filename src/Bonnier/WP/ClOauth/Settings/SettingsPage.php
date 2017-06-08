@@ -187,7 +187,6 @@ class SettingsPage
         if (isset($this->settingsValues[$settingKey]) && !empty($this->settingsValues[$settingKey])) {
             return $this->settingsValues[$settingKey];
         }
-        
         return false;
     }
 
