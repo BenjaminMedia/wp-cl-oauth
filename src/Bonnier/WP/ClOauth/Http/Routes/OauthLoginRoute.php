@@ -4,7 +4,6 @@ namespace Bonnier\WP\ClOauth\Http\Routes;
 
 use Bonnier\WP\ClOauth\Admin\PostMetaBox;
 use Bonnier\WP\ClOauth\Http\Exceptions\HttpException;
-use Bonnier\WP\ClOauth\Models\User;
 use Exception;
 use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
@@ -143,13 +142,13 @@ class OauthLoginRoute
      */
     public function is_authenticated($postId = null)
     {
-        if(!$postId) {
+        /*if(!$postId) {
             $postId = get_the_ID();
-        }
+        }*/
 
         $this->service = $this->get_oauth_service();
         $user = $this->get_common_login_user();
-        if($user){
+        if ($user) {
             return true;
         }
 
@@ -195,16 +194,9 @@ class OauthLoginRoute
      */
     private function trigger_login_flow($requiredRole = null)
     {
-        $currentLocale = $this->settings->get_current_locale();
-
-        if(!$requiredRole) {
-            $requiredRole = $this->settings->get_required_user_role($currentLocale);
-        }
         $this->redirect(
-
             $this->service->getAuthorizationUrl()
         );
-
     }
 
     /**
@@ -222,20 +214,21 @@ class OauthLoginRoute
             $this->service->getUser();
         }
 
-        $redirectUri = $this->get_redirect_uri();
+        //$redirectUri = $this->get_redirect_uri();
 
-        try{
+        try {
             if ($accessToken = $this->get_access_token()) {
 
                 $this->service->setAccessToken($accessToken);
                 $this->set_access_token_cookie($accessToken);
-                return $this->service->getUser($this->service->getCurrentAccessToken());
 
+                return $this->service->getUser($this->service->getCurrentAccessToken());
             } elseif ($request && $grantToken = $request->get_param('code')) {
 
                 $accessToken = $this->service->getAccessToken('authorization_code', [
                     'code' => $grantToken
                 ]);
+
                 $this->service->setAccessToken($accessToken);
                 $this->set_access_token_cookie($accessToken);
                 return $this->service->getUser($this->service->getCurrentAccessToken());
@@ -326,41 +319,6 @@ class OauthLoginRoute
     private function get_auth_destination()
     {
         return isset($_COOKIE[self::AUTH_DESTINATION_COOKIE_KEY]) ? $_COOKIE[self::AUTH_DESTINATION_COOKIE_KEY] : false;
-    }
-
-    /**
-     * Returns the currently used HTTP protocol
-     *
-     * @return string
-     */
-    private function get_http_protocol()
-    {
-        return strpos('HTTP', getenv('SERVER_PROTOCOL')) === false ? 'http://' : 'https://';
-    }
-
-    /**
-     * Returns the host including the HTTP protocol
-     *
-     * @return string
-     */
-    private function get_host()
-    {
-        return $this->get_http_protocol() . getenv('HTTP_HOST');
-    }
-
-    /**
-     * Gets the redirect uri that matches the login route
-     *
-     * @return string
-     */
-    private function get_redirect_uri()
-    {
-        return $this->get_host()
-        . '/'
-        . self::BASE_PREFIX
-        . '/'
-        . $this->get_route_namespace()
-        . self::LOGIN_ROUTE;
     }
 
     /**

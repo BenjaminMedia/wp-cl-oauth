@@ -62,7 +62,7 @@ class User
 
         self::set_access_token($userId, $accessToken);
 
-        update_user_meta($userId, 'wa_user_id', $commonLoginUser->id);
+        update_user_meta($userId, 'cl_user_id', $commonLoginUser->id);
 
         self::update_local_user($userId, $commonLoginUser);
     }
