@@ -2,7 +2,7 @@
   "config": {
     "secure-http": false
   },
-  "name": "benjaminmedia/wp-wa-oauth",
+  "name": "benjaminmedia/wp-cl-oauth",
   "description": "Log in users from the WA platform",
   "type": "wordpress-plugin",
   "keywords": ["wordpress", "plugin"],
