@@ -6,7 +6,7 @@
   "description": "Log in users from the WA platform",
   "type": "wordpress-plugin",
   "keywords": ["wordpress", "plugin"],
-  "homepage": "https://github.com/BenjaminMedia/wp-wa-oauth",
+  "homepage": "https://github.com/BenjaminMedia/wp-cl-oauth",
   "repositories":[
     {
       "type": "composer",
@@ -25,8 +25,8 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/BenjaminMedia/wp-wa-oauth/issues",
-    "source": "https://github.com/BenjaminMedia/wp-wa-oauth"
+    "issues": "https://github.com/BenjaminMedia/wp-cl-oauth/issues",
+    "source": "https://github.com/BenjaminMedia/wp-cl-oauth"
   },
   "autoload": {
     "psr-4": {
