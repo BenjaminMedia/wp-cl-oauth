@@ -3,9 +3,10 @@
 namespace Bonnier\WP\ClOauth\Services;
 
 use Bonnier\WP\ClOauth;
+use Bonnier\WP\ClOauth\Plugin;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
-use \League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\GenericResourceOwner;
 use \League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
@@ -85,10 +86,12 @@ class CommonLoginOAuth extends AbstractProvider
 
     public function getCurrentAccessToken()
     {
-        if(isset($this->accessToken)){
+        if(isset($this->accessToken)) {
             $options = ['access_token' => $this->accessToken];
-            return new AccessToken($options);
+            $accessToken =  new AccessToken($options);
+            return $accessToken;
         }
+
         return false;
     }
 
