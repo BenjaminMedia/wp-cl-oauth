@@ -10,7 +10,6 @@
 
 namespace Bonnier\WP\ClOauth;
 
-use Bonnier\WP\ClOauth\Admin\PostMetaBox;
 use Bonnier\WP\ClOauth\Assets\Scripts;
 use Bonnier\WP\ClOauth\Http\Routes\OauthLoginRoute;
 use Bonnier\WP\ClOauth\Http\Routes\UserUpdateCallbackRoute;
@@ -40,7 +39,7 @@ class Plugin
      */
     const TEXT_DOMAIN = 'bp-cl-oauth';
 
-    const PURCHASE_MANAGER_URL = 'https://services.bonnier.cloud/pm';
+    const PURCHASE_MANAGER_URL = 'http://purchasemanager.bonnier.cloud/';
 
     const CLASS_DIR = 'src';
 
@@ -94,7 +93,6 @@ class Plugin
 
     private function boostrap() {
         Scripts::bootstrap();
-        PostMetaBox::register_meta_box();
     }
 
     /**
@@ -117,12 +115,24 @@ class Plugin
         return self::$instance;
     }
 
-    public function is_authenticated($postId = null) {
-        return $this->loginRoute->is_authenticated($postId);
+    public function is_authenticated() {
+        return $this->loginRoute->is_authenticated();
     }
 
-    public function get_user() {
-        return $this->loginRoute->get_common_login_user();
+    public function has_access($productId, $callbackUrl){
+        return $this->loginRoute->has_access($productId, $callbackUrl);
+    }
+
+    public function get_payment_url($productId, $callbackUrl){
+        return $this->loginRoute->getPaymentUrl($productId, $callbackUrl);
+    }
+
+    public function get_oauth_state(){
+        return $this->loginRoute->get_oauth_state();
+    }
+
+    public function get_user($callback = null) {
+        return $this->loginRoute->get_common_login_user(false, $callback);
     }
 
 }
