@@ -131,8 +131,8 @@ class Plugin
         return $this->loginRoute->get_oauth_state();
     }
 
-    public function get_user($callback = null) {
-        return $this->loginRoute->get_common_login_user(false, $callback);
+    public function get_user() {
+        return $this->loginRoute->getCommonLoginUser();
     }
 
 }

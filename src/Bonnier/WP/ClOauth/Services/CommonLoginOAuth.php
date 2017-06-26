@@ -19,7 +19,6 @@ class CommonLoginOAuth extends AbstractProvider
     private $pluginInstance;
     private $baseAuthorizationUrl;
     private $accessToken;
-    private $user;
     protected $scopes = [ 'user_read' ];
     private $responseError = 'error';
     private $responseCode;
@@ -86,10 +85,8 @@ class CommonLoginOAuth extends AbstractProvider
 
     public function getCurrentAccessToken()
     {
-        if(isset($this->accessToken)) {
-            $options = ['access_token' => $this->accessToken];
-            $accessToken =  new AccessToken($options);
-            return $accessToken;
+        if($token = isset($this->accessToken)) {
+            return AccessTokenService::ClassInstanceByToken($token);
         }
 
         return false;
@@ -146,12 +143,12 @@ class CommonLoginOAuth extends AbstractProvider
         if ($this->user !== null) {
             return $this->user;
         }
-        if($this->getCurrentAccessToken()){
-            $this->user = $this->getResourceOwner($this->getCurrentAccessToken());
+        if($accessTokenFromStorage = AccessTokenService::getAccessTokenFromStorage()){
+            $this->user = $this->service->getResourceOwner($accessTokenFromStorage);
             return $this->user;
         }
         if(isset($accessToken)){
-            $this->user = $this->getResourceOwner($accessToken);
+            $this->user = $this->service->getResourceOwner($accessToken);
             return $this->user;
         }
 
