@@ -179,4 +179,18 @@ class CommonLoginOAuth extends AbstractProvider
 
         return $this->user;
     }
+
+    /**
+     * Returns the default headers used by this provider.
+     *
+     * Typically this is used to set 'Accept' or 'Content-Type' headers.
+     *
+     * @return array
+     */
+    protected function getDefaultHeaders()
+    {
+        return [
+            'Accept' => 'application/json'
+        ];
+    }
 }
