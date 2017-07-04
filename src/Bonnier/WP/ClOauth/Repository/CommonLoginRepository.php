@@ -17,12 +17,19 @@ class CommonLoginRepository
      * The access token cookie lifetime.
      */
     const USER_CACHE_LIFETIME_MINUTES = 10;
+    /**
+     * The auth destination cookie key.
+     */
+    const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
 
     /**
      * @param $accessToken
      * @return array|bool|mixed|object
      */
     public function getUserFromCacheOrSave($accessToken) {
+        if($accessToken instanceof AccessToken){
+            $accessToken = $accessToken->getToken();
+        }
         $accessTokenKey = Plugin::TEXT_DOMAIN.'-'.md5($accessToken);
         if($user = wp_cache_get($accessTokenKey) ){
             return json_decode($user);
@@ -130,8 +137,7 @@ class CommonLoginRepository
                 ]);
             }
             catch(HttpException $e){
-                //TODO: Fix this
-                RedirectHelper::redirect($this->getPaymentUrl($productId, $callbackUrl, $accessToken->getToken()));
+                return false;
             }
 
             if($response && 200 == $response->getStatusCode()){
@@ -158,7 +164,7 @@ class CommonLoginRepository
             $accessToken = ($token = AccessTokenService::getAccessTokenFromStorage()) ? $token : false;
             if(!$this->isAuthenticated()){
                 return home_url('/').OauthLoginRoute::BASE_PREFIX.'/'.OauthLoginRoute::PLUGIN_PREFIX.'/'.OauthLoginRoute::VERSION.'/'.OauthLoginRoute::LOGIN_ROUTE.'?redirectUri='.
-                $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId]));
+                $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri']));
             }
         }
         return $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl);
@@ -184,7 +190,7 @@ class CommonLoginRepository
         if($accessTokenFromStorage = AccessTokenService::getAccessTokenFromStorage()){
             $AccessTokenInstance = AccessTokenService::ClassInstanceByToken($accessTokenFromStorage);
         }
-        if(!isset($accessTokenFromStorage) && $accessToken){
+        if(!isset($accessTokenFromStorage) && !empty($accessToken)){
             $AccessTokenInstance = AccessTokenService::ClassInstanceByToken($accessToken);
         }
 
@@ -199,13 +205,15 @@ class CommonLoginRepository
      * Triggers the login flow by redirecting the user to the login Url
      * @param $state
      */
-    public function triggerLoginFlow($state = null)
+    public function triggerLoginFlow($state = false, $redirectUri = false)
     {
         $options = [];
-        if(isset($state)){
-            $options = [
-                'state' => $state
-            ];
+        if(isset($state) && !empty($state)){
+            $options['state'] = $state;
+        }
+
+        if(!empty($redirectUri)){
+            $options['redirect_uri'] = $redirectUri;
         }
         $repoClass = new CommonLoginRepository();
         RedirectHelper::redirect(
@@ -230,5 +238,26 @@ class CommonLoginRepository
         }
 
         return $this->oAuthService;
+    }
+
+    /**
+     * Persist the auth destination in a cookie
+     *
+     * @param $destination
+     */
+    public function setAuthDestination($destination)
+    {
+        setcookie(self::AUTH_DESTINATION_COOKIE_KEY, $destination, time() + (1 * 60 * 60), '/');
+        return $destination;
+    }
+
+    /**
+     * Get the auth destination from the cookie
+     *
+     * @return bool
+     */
+    public function getAuthDestination()
+    {
+        return isset($_COOKIE[self::AUTH_DESTINATION_COOKIE_KEY]) ? $_COOKIE[self::AUTH_DESTINATION_COOKIE_KEY] : false;
     }
 }

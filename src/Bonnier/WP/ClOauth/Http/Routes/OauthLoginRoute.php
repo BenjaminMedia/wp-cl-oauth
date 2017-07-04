@@ -45,25 +45,8 @@ class OauthLoginRoute
      */
     const ACCESS_TOKEN_LIFETIME_HOURS = 24;
 
-    /**
-     * The access token cookie key.
-     */
-    const ACCESS_TOKEN_COOKIE_KEY = 'bp_cl_oauth_token';
-
-    /**
-     * The auth destination cookie key.
-     */
-    const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
-
     /* @var SettingsPage $settings */
     private $settings;
-
-    /* @var CommonLoginOAuth $service */
-    private $service;
-    /**
-     * @var
-     */
-    private $user;
 
     /**
      * OauthLoginRoute constructor.
@@ -96,13 +79,16 @@ class OauthLoginRoute
         $redirectUri = $request->get_param('redirectUri');
         $state = $request->get_param('state');
         $postRequiredRole = null;
+        $repoClass = new CommonLoginRepository();
 
         // Persist auth destination
-        $this->set_auth_destination($redirectUri);
+        // Check if auth destination has been set
+        if(!$redirect = $repoClass->getAuthDestination()){
+           $redirect = $repoClass->setAuthDestination($redirectUri);
+        }
 
         // Get user from admin service
         try {
-            $repoClass = new CommonLoginRepository();
             $commonLoginUser = $repoClass->getUserFromLoginRequest($request);
             if (!$commonLoginUser) {
                 $repoClass->triggerLoginFlow($state);
@@ -115,13 +101,12 @@ class OauthLoginRoute
             $state = json_decode(Base64::UrlDecode($state));
             if(isset($state->purchase)) {
                 if($accessToken = AccessTokenService::getAccessTokenFromStorage()){
-                    RedirectHelper::redirect($this->getPaymentUrl($state->purchase, $state->product_url, $accessToken));
+                    RedirectHelper::redirect($repoClass->getPaymentUrl($state->purchase, $state->product_url, $accessToken));
                 }
             }
         }
 
-        // Check if auth destination has been set
-        $redirect = $this->get_auth_destination();
+        $redirect = $repoClass->getAuthDestination();
 
         if (!$redirect) {
             // Redirect to home page
@@ -162,26 +147,5 @@ class OauthLoginRoute
     private function get_route_namespace()
     {
         return self::PLUGIN_PREFIX . '/' . self::VERSION;
-    }
-
-
-    /**
-     * Persist the auth destination in a cookie
-     *
-     * @param $destination
-     */
-    private function set_auth_destination($destination)
-    {
-        setcookie(self::AUTH_DESTINATION_COOKIE_KEY, $destination, time() + (1 * 60 * 60), '/');
-    }
-
-    /**
-     * Get the auth destination from the cookie
-     *
-     * @return bool
-     */
-    private function get_auth_destination()
-    {
-        return isset($_COOKIE[self::AUTH_DESTINATION_COOKIE_KEY]) ? $_COOKIE[self::AUTH_DESTINATION_COOKIE_KEY] : false;
     }
 }

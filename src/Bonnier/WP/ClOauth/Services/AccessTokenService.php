@@ -112,7 +112,7 @@ class AccessTokenService
 
 
     public static function getAccessTokenFromStorage() {
-        $accessToken = ($byCookie = self::getTokenFromCookie()) ? $byCookie : false;
+        $accessToken = ($byCookie = self::ClassInstanceByToken(self::getTokenFromCookie())) ? $byCookie : false;
         $accessToken = (!$accessToken && $byInstance = self::ClassInstanceByToken(self::instance()->getOAuthService()->getCurrentAccessToken())) ? $byInstance : $accessToken;
         return $accessToken;
     }
