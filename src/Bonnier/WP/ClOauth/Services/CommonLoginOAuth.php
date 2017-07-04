@@ -16,7 +16,7 @@ class CommonLoginOAuth extends AbstractProvider
 {
     use BearerAuthorizationTrait;
 
-    private $pluginInstance;
+    private $instance;
     private $baseAuthorizationUrl;
     private $accessToken;
     protected $scopes = [ 'user_read' ];
@@ -64,12 +64,12 @@ class CommonLoginOAuth extends AbstractProvider
      * CommonLoginOAuth constructor.
      * @param $pluginInstance
      */
-    public function __construct(array $options = [], $settings)
+    public function __construct(array $options = [])
     {
 
-        $this->pluginInstance = ClOauth\instance();
+        $this->instance = ClOauth\instance();
 
-        $this->setBaseAuthorizationUrl($this->pluginInstance->settings->get_api_endpoint($settings->get_current_locale()));
+        $this->setBaseAuthorizationUrl(Plugin::instance()->settings->get_api_endpoint(Plugin::instance()->settings->get_current_locale()));
         parent::__construct($options);
     }
 
@@ -101,22 +101,6 @@ class CommonLoginOAuth extends AbstractProvider
     }
 
     /**
-     * @return mixed
-     */
-    public function getPluginInstance()
-    {
-        return $this->pluginInstance;
-    }
-
-    /**
-     * @param mixed $pluginInstance
-     */
-    public function setPluginInstance($pluginInstance)
-    {
-        $this->pluginInstance = $pluginInstance;
-    }
-
-    /**
      * @return null
      */
     public function getBaseAuthorizationUrl()
@@ -140,16 +124,13 @@ class CommonLoginOAuth extends AbstractProvider
      */
     public function getUser($accessToken = false)
     {
-        if ($this->user !== null) {
-            return $this->user;
-        }
-        if($accessTokenFromStorage = AccessTokenService::getAccessTokenFromStorage()){
-            $this->user = $this->service->getResourceOwner($accessTokenFromStorage);
-            return $this->user;
-        }
-        if(isset($accessToken)){
-            $this->user = $this->service->getResourceOwner($accessToken);
-            return $this->user;
+        if(!empty($accessToken)){
+            try {
+                return $this->getResourceOwner($accessToken);
+            }
+            catch (IdentityProviderException $exception) {
+                return false;
+            }
         }
 
         return false;
