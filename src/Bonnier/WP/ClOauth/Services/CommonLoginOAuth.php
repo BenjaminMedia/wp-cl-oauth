@@ -16,10 +16,9 @@ class CommonLoginOAuth extends AbstractProvider
 {
     use BearerAuthorizationTrait;
 
-    private $pluginInstance;
+    private $instance;
     private $baseAuthorizationUrl;
     private $accessToken;
-    private $user;
     protected $scopes = [ 'user_read' ];
     private $responseError = 'error';
     private $responseCode;
@@ -65,12 +64,12 @@ class CommonLoginOAuth extends AbstractProvider
      * CommonLoginOAuth constructor.
      * @param $pluginInstance
      */
-    public function __construct(array $options = [], $settings)
+    public function __construct(array $options = [])
     {
 
-        $this->pluginInstance = ClOauth\instance();
+        $this->instance = ClOauth\instance();
 
-        $this->setBaseAuthorizationUrl($this->pluginInstance->settings->get_api_endpoint($settings->get_current_locale()));
+        $this->setBaseAuthorizationUrl(Plugin::instance()->settings->get_api_endpoint(Plugin::instance()->settings->get_current_locale()));
         parent::__construct($options);
     }
 
@@ -86,10 +85,8 @@ class CommonLoginOAuth extends AbstractProvider
 
     public function getCurrentAccessToken()
     {
-        if(isset($this->accessToken)) {
-            $options = ['access_token' => $this->accessToken];
-            $accessToken =  new AccessToken($options);
-            return $accessToken;
+        if($token = isset($this->accessToken)) {
+            return AccessTokenService::ClassInstanceByToken($token);
         }
 
         return false;
@@ -101,22 +98,6 @@ class CommonLoginOAuth extends AbstractProvider
     public function setBaseAuthorizationUrl($baseAuthorizationUrl)
     {
         $this->baseAuthorizationUrl = $baseAuthorizationUrl;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPluginInstance()
-    {
-        return $this->pluginInstance;
-    }
-
-    /**
-     * @param mixed $pluginInstance
-     */
-    public function setPluginInstance($pluginInstance)
-    {
-        $this->pluginInstance = $pluginInstance;
     }
 
     /**
@@ -143,16 +124,13 @@ class CommonLoginOAuth extends AbstractProvider
      */
     public function getUser($accessToken = false)
     {
-        if ($this->user !== null) {
-            return $this->user;
-        }
-        if($this->getCurrentAccessToken()){
-            $this->user = $this->getResourceOwner($this->getCurrentAccessToken());
-            return $this->user;
-        }
-        if(isset($accessToken)){
-            $this->user = $this->getResourceOwner($accessToken);
-            return $this->user;
+        if(!empty($accessToken)){
+            try {
+                return $this->getResourceOwner($accessToken);
+            }
+            catch (IdentityProviderException $exception) {
+                return false;
+            }
         }
 
         return false;
@@ -181,5 +159,19 @@ class CommonLoginOAuth extends AbstractProvider
         }
 
         return $this->user;
+    }
+
+    /**
+     * Returns the default headers used by this provider.
+     *
+     * Typically this is used to set 'Accept' or 'Content-Type' headers.
+     *
+     * @return array
+     */
+    protected function getDefaultHeaders()
+    {
+        return [
+            'Accept' => 'application/json'
+        ];
     }
 }

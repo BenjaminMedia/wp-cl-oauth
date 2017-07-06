@@ -14,6 +14,7 @@ use Bonnier\WP\ClOauth\Assets\Scripts;
 use Bonnier\WP\ClOauth\Http\Routes\OauthLoginRoute;
 use Bonnier\WP\ClOauth\Http\Routes\UserUpdateCallbackRoute;
 use Bonnier\WP\ClOauth\Models\User;
+use Bonnier\WP\ClOauth\Repository\CommonLoginRepository;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 
 // Do not access this file directly
@@ -91,7 +92,7 @@ class Plugin
         new UserUpdateCallbackRoute($this->settings);
     }
 
-    private function boostrap() {
+    private function bootstrap() {
         Scripts::bootstrap();
     }
 
@@ -104,7 +105,7 @@ class Plugin
             self::$instance = new self;
             global $bp_cl_oauth;
             $bp_cl_oauth = self::$instance;
-            self::$instance->boostrap();
+            self::$instance->bootstrap();
 
             /**
              * Run after the plugin has been loaded.
@@ -116,23 +117,23 @@ class Plugin
     }
 
     public function is_authenticated() {
-        return $this->loginRoute->is_authenticated();
+        $repoClass = new CommonLoginRepository();
+        return $repoClass->isAuthenticated();
     }
 
     public function has_access($productId, $callbackUrl){
-        return $this->loginRoute->has_access($productId, $callbackUrl);
+        $repoClass = new CommonLoginRepository();
+        return $repoClass->hasAccessTo($productId, $callbackUrl);
     }
 
     public function get_payment_url($productId, $callbackUrl){
-        return $this->loginRoute->getPaymentUrl($productId, $callbackUrl);
+        $repoClass = new CommonLoginRepository();
+        return $repoClass->getPaymentUrl($productId, $callbackUrl);
     }
 
-    public function get_oauth_state(){
-        return $this->loginRoute->get_oauth_state();
-    }
-
-    public function get_user($callback = null) {
-        return $this->loginRoute->get_common_login_user(false, $callback);
+    public function get_user() {
+        $repoClass = new CommonLoginRepository();
+        return $repoClass->getUser();
     }
 
 }
