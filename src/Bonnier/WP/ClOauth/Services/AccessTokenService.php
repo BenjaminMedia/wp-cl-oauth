@@ -44,7 +44,7 @@ class AccessTokenService
      *
      * @param $token
      */
-    public static function setAccessTokenCookie($token)
+    private static function setAccessTokenCookie($token)
     {
         setcookie(self::ACCESS_TOKEN_COOKIE_KEY, $token, self::accessTokenCookieLifetime(),
             '/');

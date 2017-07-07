@@ -78,6 +78,7 @@ class OauthLoginRoute
     {
         $redirectUri = $request->get_param('redirectUri');
         $state = $request->get_param('state');
+        $accessToken = $request->get_param('accessToken');
         $postRequiredRole = null;
         $repoClass = new CommonLoginRepository();
 
@@ -85,6 +86,11 @@ class OauthLoginRoute
         // Check if auth destination has been set
         if(!$redirect = $repoClass->getAuthDestination()){
            $redirect = $repoClass->setAuthDestination($redirectUri);
+        }
+
+        if(isset($accessToken) && !empty($accessToken)){
+            AccessTokenService::setAccessTokenToStorage($accessToken);
+            RedirectHelper::redirect($redirectUri);
         }
 
         // Get user from admin service
