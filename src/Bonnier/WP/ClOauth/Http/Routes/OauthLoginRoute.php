@@ -9,6 +9,7 @@ use Bonnier\WP\ClOauth\Repository\CommonLoginRepository;
 use Bonnier\WP\ClOauth\Services\AccessTokenService;
 use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -99,8 +100,9 @@ class OauthLoginRoute
             if (!$commonLoginUser) {
                 $repoClass->triggerLoginFlow($state);
             }
-        } catch (HttpException $e) {
-            return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
+        } catch (IdentityProviderException $exception) {
+            $repoClass->triggerLoginFlow($state);
+            //return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
         }
 
         if($state){
