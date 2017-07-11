@@ -9,6 +9,7 @@ use Bonnier\WP\ClOauth\Repository\CommonLoginRepository;
 use Bonnier\WP\ClOauth\Services\AccessTokenService;
 use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -78,6 +79,7 @@ class OauthLoginRoute
     {
         $redirectUri = $request->get_param('redirectUri');
         $state = $request->get_param('state');
+        $accessToken = $request->get_param('accessToken');
         $postRequiredRole = null;
         $repoClass = new CommonLoginRepository();
 
@@ -87,14 +89,20 @@ class OauthLoginRoute
            $redirect = $repoClass->setAuthDestination($redirectUri);
         }
 
+        if(isset($accessToken) && !empty($accessToken)){
+            AccessTokenService::setAccessTokenToStorage($accessToken);
+            RedirectHelper::redirect($redirectUri);
+        }
+
         // Get user from admin service
         try {
             $commonLoginUser = $repoClass->getUserFromLoginRequest($request);
             if (!$commonLoginUser) {
                 $repoClass->triggerLoginFlow($state);
             }
-        } catch (HttpException $e) {
-            return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
+        } catch (IdentityProviderException $exception) {
+            $repoClass->triggerLoginFlow($state);
+            //return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
         }
 
         if($state){
