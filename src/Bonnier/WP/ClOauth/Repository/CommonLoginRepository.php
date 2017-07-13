@@ -127,7 +127,7 @@ class CommonLoginRepository
             try{
                 $response = $client->get('has_access',[
                     'body' => [
-                        'access_token' => $accessToken,
+                        'access_token' => $accessToken->getToken(),
                         'product_id' => $productId,
                         'callback' => $callbackUrl,
                     ],
