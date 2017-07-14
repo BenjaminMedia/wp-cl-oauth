@@ -131,6 +131,9 @@ class CommonLoginOAuth extends AbstractProvider
             catch (IdentityProviderException $exception) {
                 return false;
             }
+            catch (\Exception $exception) {
+                return false;
+            }
         }
 
         return false;
