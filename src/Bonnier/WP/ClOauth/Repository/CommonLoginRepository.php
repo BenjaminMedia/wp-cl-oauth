@@ -155,7 +155,7 @@ class CommonLoginRepository
      * @param bool|false $accessToken
      * @return string
      */
-    public function getPaymentUrl($productId, $callbackUrl = false, $accessToken = false) {
+    public function getPaymentUrl($productId, $callbackUrl = false, $accessToken = false, $paymentPreviewAttributes) {
         if(!$callbackUrl){
             $callbackUrl = home_url('/');
         }
@@ -164,10 +164,21 @@ class CommonLoginRepository
             $accessToken = ($token = AccessTokenService::getAccessTokenFromStorage()) ? $token : false;
             if(!$this->isAuthenticated()){
                 return home_url('/').OauthLoginRoute::BASE_PREFIX.'/'.OauthLoginRoute::PLUGIN_PREFIX.'/'.OauthLoginRoute::VERSION.'/'.OauthLoginRoute::LOGIN_ROUTE.'?redirectUri='.
-                $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri']));
+                $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri'])) . $this->paymentPreviewParameters($paymentPreviewAttributes);
             }
         }
-        return $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl);
+        return $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl) . $this->paymentPreviewParameters($paymentPreviewAttributes);
+    }
+
+    public static function paymentPreviewParameters($paymentArticlePreviewAttributes){
+        $attributes = '';
+        foreach($paymentArticlePreviewAttributes as $key => $attribute){
+            $attributes .= '&'.$key.'='. urlencode($attribute);
+        }
+        if(!empty($attributes)){
+            return $attributes;
+        }
+        return false;
     }
 
     /**

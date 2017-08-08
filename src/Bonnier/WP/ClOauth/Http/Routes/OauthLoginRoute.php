@@ -105,11 +105,12 @@ class OauthLoginRoute
             //return new WP_REST_Response(['error' => $e->getMessage()], $e->getCode());
         }
 
+        //TODO: kill this, so that login can work without purchase
         if($state){
             $state = json_decode(Base64::UrlDecode($state));
             if(isset($state->purchase)) {
                 if($accessToken = AccessTokenService::getAccessTokenFromStorage()){
-                    RedirectHelper::redirect($repoClass->getPaymentUrl($state->purchase, $state->product_url, $accessToken));
+                    RedirectHelper::redirect($repoClass->getPaymentUrl($state->purchase, $state->product_url, $accessToken, $state->product_preview));
                 }
             }
         }
