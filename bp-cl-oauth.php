@@ -73,6 +73,8 @@ class Plugin
      */
     public $plugin_url;
 
+    private $clRepo;
+
     /**
      * Do not load this more than once.
      */
@@ -117,23 +119,31 @@ class Plugin
     }
 
     public function is_authenticated() {
-        $repoClass = new CommonLoginRepository();
-        return $repoClass->isAuthenticated();
+        if(!$this->clRepo) {
+            $this->clRepo = new CommonLoginRepository();
+        }
+        return $this->clRepo->isAuthenticated();
     }
 
     public function has_access($productId, $callbackUrl){
-        $repoClass = new CommonLoginRepository();
-        return $repoClass->hasAccessTo($productId, $callbackUrl);
+        if(!$this->clRepo) {
+            $this->clRepo = new CommonLoginRepository();
+        }
+        return $this->clRepo->hasAccessTo($productId, $callbackUrl);
     }
 
     public function get_payment_url($productId, $callbackUrl){
-        $repoClass = new CommonLoginRepository();
-        return $repoClass->getPaymentUrl($productId, $callbackUrl);
+        if(!$this->clRepo) {
+            $this->clRepo = new CommonLoginRepository();
+        }
+        return $this->clRepo->getPaymentUrl($productId, $callbackUrl);
     }
 
     public function get_user() {
-        $repoClass = new CommonLoginRepository();
-        return $repoClass->getUser();
+        if(!$this->clRepo) {
+            $this->clRepo = new CommonLoginRepository();
+        }
+        return $this->clRepo->getUser();
     }
 
 }
