@@ -199,8 +199,7 @@ class CommonLoginRepository
     public function getUserByAccessToken($accessToken = false)
     {
         $accessTokenFromStorage = AccessTokenService::getAccessTokenFromStorage();
-
-        if($accessTokenFromStorage && $accessTokenFromStorage->getToken() && $accessTokenFromStorage->getToken() !== true){
+        if($accessTokenFromStorage && $accessTokenFromStorage->getToken() && is_string($accessTokenFromStorage->getToken())){
             $AccessTokenInstance = AccessTokenService::ClassInstanceByToken($accessTokenFromStorage);
         } else {
             $AccessTokenInstance = AccessTokenService::ClassInstanceByToken($accessToken);
