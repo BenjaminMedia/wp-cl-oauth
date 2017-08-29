@@ -62,11 +62,10 @@ class CommonLoginOAuth extends AbstractProvider
 
     /**
      * CommonLoginOAuth constructor.
-     * @param $pluginInstance
+     * @param array $options
      */
     public function __construct(array $options = [])
     {
-
         $this->instance = ClOauth\instance();
 
         $this->setBaseAuthorizationUrl(Plugin::instance()->settings->get_api_endpoint(Plugin::instance()->settings->get_current_locale()));

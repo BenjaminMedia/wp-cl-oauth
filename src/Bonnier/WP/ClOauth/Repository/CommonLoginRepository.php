@@ -22,6 +22,8 @@ class CommonLoginRepository
      */
     const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
 
+    private $user;
+
     /**
      * @param $accessToken
      * @return array|bool|mixed|object
@@ -73,15 +75,20 @@ class CommonLoginRepository
      */
     public function getUser($accessToken = false)
     {
+        if($this->user) {
+            return $this->user;
+        }
         if(!isset($accessToken)) {
             $accessToken = AccessTokenService::getAccessTokenFromStorage();
         }
 
         if($user = $this->getUserFromCacheOrSave($accessToken)){
+            $this->user = $user;
             return $user;
         }
 
         if($user = $this->getOAuthService()->getUser($accessToken)){
+            $this->user = $user;
             return $user;
         }
 
@@ -94,16 +101,10 @@ class CommonLoginRepository
      */
     public function isAuthenticated()
     {
-        /*if(!$postId) {
-            $postId = get_the_ID();
-        }*/
-        $repoClass = new CommonLoginRepository();
-        if ($repoClass->getUser()) {
+        if ($this->getUser()) {
             return true;
         }
 
-        /*$wpUser = new User();
-        $wpUser->create_local_user($user, $this->get_oauth_service()->getCurrentAccessToken()); no local users for us :> */
         return false;
     }
 
@@ -225,9 +226,8 @@ class CommonLoginRepository
         if(!empty($redirectUri)){
             $options['redirect_uri'] = $redirectUri;
         }
-        $repoClass = new CommonLoginRepository();
         RedirectHelper::redirect(
-            $repoClass->getOAuthService()->getAuthorizationUrl($options)
+            $this->getOAuthService()->getAuthorizationUrl($options)
         );
     }
 
@@ -244,7 +244,7 @@ class CommonLoginRepository
                 'clientId' => Plugin::instance()->settings->get_api_user($locale),
                 'clientSecret' => Plugin::instance()->settings->get_api_secret($locale),
                 'scopes' => [],
-            ], Plugin::instance()->settings);
+            ]);
         }
 
         return $this->oAuthService;
