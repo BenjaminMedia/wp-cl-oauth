@@ -168,7 +168,12 @@ class CommonLoginRepository
                 $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri'])) . $this->paymentPreviewParameters($paymentPreviewAttributes);
             }
         }
-        return $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl) . $this->paymentPreviewParameters($paymentPreviewAttributes);
+        return $plugin::PURCHASE_MANAGER_URL.
+            'has_access?access_token='.urlencode($accessToken).
+            '&product_id='.urlencode($productId).
+            '&callback='.urlencode($callbackUrl).
+            '&site_id='.wpSiteManager()->settings()->getSiteId(get_locale()).
+            $this->paymentPreviewParameters($paymentPreviewAttributes);
     }
 
     public static function paymentPreviewParameters($paymentArticlePreviewAttributes){
