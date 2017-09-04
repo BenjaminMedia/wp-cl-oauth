@@ -231,7 +231,7 @@ class SettingsPage
 
     public function get_purchase_manager_url($locale = null)
     {
-        return $this->get_settings_value('purchase_manager', $locale) ?: '';
+        return $this->get_setting_value('purchase_manager', $locale) ?: '';
     }
 
     private function enable_language_fields()
