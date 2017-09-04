@@ -40,8 +40,6 @@ class Plugin
      */
     const TEXT_DOMAIN = 'bp-cl-oauth';
 
-    const PURCHASE_MANAGER_URL = 'http://purchasemanager.bonnier.cloud/';
-
     const CLASS_DIR = 'src';
 
     /**
