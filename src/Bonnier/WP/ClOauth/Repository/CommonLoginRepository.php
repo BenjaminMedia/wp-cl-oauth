@@ -122,7 +122,7 @@ class CommonLoginRepository
         }
         $plugin = Plugin::instance();
         $client = new Client([
-            'base_uri' => $plugin::PURCHASE_MANAGER_URL
+            'base_uri' => $plugin->settings->get_purchase_manager_url($plugin->settings->get_current_locale()),
         ]);
         if($accessToken = AccessTokenService::getAccessTokenFromStorage()){
             try{
@@ -161,14 +161,15 @@ class CommonLoginRepository
             $callbackUrl = home_url('/');
         }
         $plugin = Plugin::instance();
+        $locale = $plugin->settings->get_current_locale();
         if(!$accessToken){
             $accessToken = ($token = AccessTokenService::getAccessTokenFromStorage()) ? $token : false;
             if(!$this->isAuthenticated()){
                 return home_url('/').OauthLoginRoute::BASE_PREFIX.'/'.OauthLoginRoute::PLUGIN_PREFIX.'/'.OauthLoginRoute::VERSION.'/'.OauthLoginRoute::LOGIN_ROUTE.'?redirectUri='.
-                $plugin::PURCHASE_MANAGER_URL.'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri'])) . $this->paymentPreviewParameters($paymentPreviewAttributes);
+                $plugin->settings->get_purchase_manager_url($locale).'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri'])) . $this->paymentPreviewParameters($paymentPreviewAttributes);
             }
         }
-        return $plugin::PURCHASE_MANAGER_URL.
+        return $plugin->settings->get_purchase_manager_url($plugin->settings->get_current_locale()).
             'has_access?access_token='.urlencode($accessToken).
             '&product_id='.urlencode($productId).
             '&callback='.urlencode($callbackUrl).
