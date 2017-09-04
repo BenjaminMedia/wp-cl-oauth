@@ -30,6 +30,10 @@ class SettingsPage
             'type' => 'text',
             'name' => 'Authorization Url',
         ],
+        'purchase_manager' => [
+            'type' => 'text',
+            'name' => 'Purchase Manager URL',
+        ],
     ];
 
     /**
@@ -223,6 +227,11 @@ class SettingsPage
     public function get_auto_login_local_user($locale = null)
     {
         return $this->get_setting_value('auto_login_local_user', $locale) ?: '';
+    }
+
+    public function get_purchase_manager_url($locale = null)
+    {
+        return $this->get_settings_value('purchase_manager', $locale) ?: '';
     }
 
     private function enable_language_fields()
