@@ -121,6 +121,7 @@ class CommonLoginRepository
             return false;
         }
         $plugin = Plugin::instance();
+        $wpSiteManager = \WpSiteManager\Plugin::instance();
         $client = new Client([
             'base_uri' => $plugin->settings->get_purchase_manager_url($plugin->settings->get_current_locale()),
         ]);
@@ -131,6 +132,7 @@ class CommonLoginRepository
                         'access_token' => $accessToken->getToken(),
                         'product_id' => $productId,
                         'callback' => $callbackUrl,
+                        'site_id' => $wpSiteManager->settings()->getSiteId($wpSiteManager->settings()->getCurrentLocale()),
                     ],
                     'headers' => [
                         'Accept' => 'application/json'
