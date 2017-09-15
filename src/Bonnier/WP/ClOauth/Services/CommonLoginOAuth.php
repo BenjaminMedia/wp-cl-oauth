@@ -84,8 +84,8 @@ class CommonLoginOAuth extends AbstractProvider
 
     public function getCurrentAccessToken()
     {
-        if($token = isset($this->accessToken)) {
-            return AccessTokenService::ClassInstanceByToken($token);
+        if(isset($this->accessToken)) {
+            return AccessTokenService::ClassInstanceByToken($this->accessToken);
         }
 
         return false;
