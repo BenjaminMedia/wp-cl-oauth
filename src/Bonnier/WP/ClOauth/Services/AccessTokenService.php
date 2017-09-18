@@ -74,7 +74,7 @@ class AccessTokenService
             $options = ['access_token' => $accessToken];
             return new AccessToken($options);
         }
-        return false;
+        return null;
     }
 
     /**
@@ -111,14 +111,20 @@ class AccessTokenService
     }
 
 
-    public static function getAccessTokenFromStorage() {
-        $accessToken = ($byCookie = self::ClassInstanceByToken(self::getTokenFromCookie())) ? $byCookie : false;
-        $accessToken = (!$accessToken && $byInstance = self::ClassInstanceByToken(self::instance()->getOAuthService()->getCurrentAccessToken())) ? $byInstance : $accessToken;
-        return $accessToken;
+    /**
+     * @return AccessToken|null
+     */
+    public static function getAccessTokenFromStorage()
+    {
+        if($accessToken = self::ClassInstanceByToken(self::getTokenFromCookie())) {
+            return $accessToken;
+        }
+        return self::ClassInstanceByToken(self::instance()->getOAuthService()->getCurrentAccessToken());
     }
 
 
-    public static function setAccessTokenToStorage($accessToken) {
+    public static function setAccessTokenToStorage($accessToken)
+    {
         self::instance()->getOAuthService()->setAccessToken($accessToken);
         self::setAccessTokenCookie($accessToken);
         return $accessToken;

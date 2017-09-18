@@ -179,7 +179,9 @@ class SettingsPage
 
     public function get_setting_value($settingKey, $locale = null)
     {
-
+        if(is_null($locale)) {
+            $locale = $this->get_current_locale();
+        }
         if(!$this->settingsValues) {
             $this->settingsValues = get_option(self::SETTINGS_KEY);
         }

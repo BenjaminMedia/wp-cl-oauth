@@ -1,13 +1,14 @@
 <?php
 namespace Bonnier\WP\ClOauth\Repository;
 
+use Bonnier\WP\ClOauth\Helpers\Base64;
 use Bonnier\WP\ClOauth\Helpers\RedirectHelper;
 use Bonnier\WP\ClOauth\Http\Client;
 use Bonnier\WP\ClOauth\Http\Exceptions\HttpException;
 use Bonnier\WP\ClOauth\Http\Routes\OauthLoginRoute;
-use Bonnier\WP\ClOauth\Plugin;
 use Bonnier\WP\ClOauth\Services\AccessTokenService;
 use Bonnier\WP\ClOauth\Services\CommonLoginOAuth;
+use Bonnier\WP\ClOauth\WpClOAuth;
 use League\OAuth2\Client\Token\AccessToken;
 
 class CommonLoginRepository
@@ -32,12 +33,12 @@ class CommonLoginRepository
         if($accessToken instanceof AccessToken){
             $accessToken = $accessToken->getToken();
         }
-        $accessTokenKey = Plugin::TEXT_DOMAIN.'-'.md5($accessToken);
+        $accessTokenKey = WpClOAuth::TEXT_DOMAIN.'-'.md5($accessToken);
         if($user = wp_cache_get($accessTokenKey) ){
             return json_decode($user);
         }
         if($user = self::getUserByAccessToken($accessToken)){
-            wp_cache_set($accessTokenKey, json_encode($user), Plugin::TEXT_DOMAIN ,
+            wp_cache_set($accessTokenKey, json_encode($user), WpClOAuth::TEXT_DOMAIN ,
                 self::getUserCacheLifeTime());
             return $user;
         }
@@ -58,7 +59,7 @@ class CommonLoginRepository
                 ]);
                 return CommonLoginRepository::getUserFromCacheOrSave(AccessTokenService::setAccessTokenToStorage($accessToken->getToken()));
             }
-            catch(Exception $exception) {
+            catch(\Exception $exception) {
                 if(is_user_admin()){
                     echo var_dump($exception);
                 }
@@ -120,7 +121,7 @@ class CommonLoginRepository
         if(!$this->isAuthenticated()){
             return false;
         }
-        $plugin = Plugin::instance();
+        $plugin = WpClOAuth::instance();
         $wpSiteManager = \WpSiteManager\Plugin::instance();
         $client = new Client([
             'base_uri' => $plugin->settings->get_purchase_manager_url($plugin->settings->get_current_locale()),
@@ -154,7 +155,7 @@ class CommonLoginRepository
 
     /**
      * @param $productId
-     * @param bool|false $callbackUrl
+     * @param bool|false $callbackUrl // Article urL
      * @param bool|false $accessToken
      * @return string
      */
@@ -162,16 +163,18 @@ class CommonLoginRepository
         if(!$callbackUrl){
             $callbackUrl = home_url('/');
         }
-        $plugin = Plugin::instance();
+        $plugin = WpClOAuth::instance();
         $locale = $plugin->settings->get_current_locale();
         if(!$accessToken){
-            $accessToken = ($token = AccessTokenService::getAccessTokenFromStorage()) ? $token : false;
-            if(!$this->isAuthenticated()){
-                return home_url('/').OauthLoginRoute::BASE_PREFIX.'/'.OauthLoginRoute::PLUGIN_PREFIX.'/'.OauthLoginRoute::VERSION.'/'.OauthLoginRoute::LOGIN_ROUTE.'?redirectUri='.
-                $plugin->settings->get_purchase_manager_url($locale).'has_access?access_token='.urlencode($accessToken).'&product_id='.urlencode($productId).'&callback='.urlencode($callbackUrl).'&state='.Base64::UrlEncode(json_encode(['purchase' => $productId, 'product_uri'])) . $this->paymentPreviewParameters($paymentPreviewAttributes);
+            $accessToken = AccessTokenService::getAccessTokenFromStorage();
+            if(!$this->isAuthenticated() || !$accessToken){
+                return $callbackUrl;
             }
         }
-        return $plugin->settings->get_purchase_manager_url($plugin->settings->get_current_locale()).
+        if($accessToken instanceof AccessToken) {
+            $accessToken->getToken();
+        }
+        return $plugin->settings->get_purchase_manager_url().
             'has_access?access_token='.urlencode($accessToken).
             '&product_id='.urlencode($productId).
             '&callback='.urlencode($callbackUrl).
@@ -246,11 +249,11 @@ class CommonLoginRepository
      */
     public function getOAuthService(){
         if (!$this->oAuthService) {
-            $locale = Plugin::instance()->settings->get_current_locale();
+            $locale = WpClOAuth::instance()->settings->get_current_locale();
 
             $this->oAuthService = new CommonLoginOAuth([
-                'clientId' => Plugin::instance()->settings->get_api_user($locale),
-                'clientSecret' => Plugin::instance()->settings->get_api_secret($locale),
+                'clientId' => WpClOAuth::instance()->settings->get_api_user($locale),
+                'clientSecret' => WpClOAuth::instance()->settings->get_api_secret($locale),
                 'scopes' => [],
             ]);
         }

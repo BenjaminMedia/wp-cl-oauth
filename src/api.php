@@ -3,7 +3,7 @@
 /**
  * Returns an instance of the bp-wa-oauth plugin
  *
- * @return \Bonnier\WP\ClOauth\Plugin|null
+ * @return \Bonnier\WP\ClOauth\WpClOAuth|null
  */
 function bp_cl_oauth()
 {
