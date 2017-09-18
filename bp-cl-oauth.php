@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Bonnier Common Login OAuth
- * Version: 0.1
- * Plugin URI: https://github.com/BenjaminMedia/wp-wa-oauth
+ * Version: 1.0
+ * Plugin URI: https://github.com/BenjaminMedia/wp-cl-oauth
  * Description: This plugin allows you to integrate your site with the whitealbum oauth user api
  * Author: Bonnier - Frederik Rabøl
  * License: GPL v3
@@ -13,7 +13,6 @@ namespace Bonnier\WP\ClOauth;
 use Bonnier\WP\ClOauth\Assets\Scripts;
 use Bonnier\WP\ClOauth\Http\Routes\OauthLoginRoute;
 use Bonnier\WP\ClOauth\Http\Routes\UserUpdateCallbackRoute;
-use Bonnier\WP\ClOauth\Models\User;
 use Bonnier\WP\ClOauth\Repository\CommonLoginRepository;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 
@@ -26,14 +25,14 @@ require_once (__DIR__.'/includes/vendor/autoload.php');
 spl_autoload_register(function ($className) {
     if (strpos($className, __NAMESPACE__) !== false) {
         $className = str_replace("\\", DIRECTORY_SEPARATOR, $className);
-        require_once(__DIR__ . DIRECTORY_SEPARATOR . Plugin::CLASS_DIR . DIRECTORY_SEPARATOR . $className . '.php');
+        require_once(__DIR__ . DIRECTORY_SEPARATOR . WpClOAuth::CLASS_DIR . DIRECTORY_SEPARATOR . $className . '.php');
     }
 });
 
 // Load plugin api
-require_once (__DIR__ . '/'.Plugin::CLASS_DIR.'/api.php');
+require_once (__DIR__ . '/'.WpClOAuth::CLASS_DIR.'/api.php');
 
-class Plugin
+class WpClOAuth
 {
     /**
      * Text domain for translators
@@ -147,11 +146,11 @@ class Plugin
 }
 
 /**
- * @return Plugin $instance returns an instance of the plugin
+ * @return WpClOAuth $instance returns an instance of the plugin
  */
 function instance()
 {
-    return Plugin::instance();
+    return WpClOAuth::instance();
 }
 
 add_action('plugins_loaded', __NAMESPACE__ . '\instance', 0);

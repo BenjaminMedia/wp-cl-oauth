@@ -77,10 +77,12 @@ class OauthLoginRoute
      */
     public function login(WP_REST_Request $request)
     {
-        $redirectUri = $request->get_param('redirectUri');
-        $state = $request->get_param('state');
-        $accessToken = $request->get_param('accessToken');
+
+        $redirectUri = $request->get_param('redirectUri'); // Where should we return on successful login
+        $state = $request->get_param('state'); // Login: 'undefined'
+        $accessToken = $request->get_param('accessToken'); // Login: null
         $postRequiredRole = null;
+
         $repoClass = new CommonLoginRepository();
 
         // Persist auth destination
@@ -139,7 +141,7 @@ class OauthLoginRoute
             wp_logout();
         }
 
-        $redirectUri = $request->get_param('redirectUri');
+        $redirectUri = $this->settings->get_api_endpoint().'logout?redirect_to='.urlencode($request->get_param('redirectUri'));
 
         if($redirectUri) {
             RedirectHelper::redirect($redirectUri);

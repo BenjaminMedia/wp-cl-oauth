@@ -3,7 +3,7 @@
 namespace Bonnier\WP\ClOauth\Services;
 
 use Bonnier\WP\ClOauth;
-use Bonnier\WP\ClOauth\Plugin;
+use Bonnier\WP\ClOauth\WpClOAuth;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -68,7 +68,7 @@ class CommonLoginOAuth extends AbstractProvider
     {
         $this->instance = ClOauth\instance();
 
-        $this->setBaseAuthorizationUrl(Plugin::instance()->settings->get_api_endpoint(Plugin::instance()->settings->get_current_locale()));
+        $this->setBaseAuthorizationUrl(WpClOAuth::instance()->settings->get_api_endpoint(WpClOAuth::instance()->settings->get_current_locale()));
         parent::__construct($options);
     }
 
