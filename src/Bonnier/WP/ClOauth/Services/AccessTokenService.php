@@ -4,6 +4,7 @@ namespace Bonnier\WP\ClOauth\Services;
 
 
 use Bonnier\WP\ClOauth\Http\Routes\OauthLoginRoute;
+use Bonnier\WP\ClOauth\Repository\CommonLoginRepository;
 use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use League\OAuth2\Client\Token\AccessToken;
 
@@ -25,6 +26,8 @@ class AccessTokenService
     const ACCESS_TOKEN_COOKIE_KEY = 'bp_cl_oauth_token';
 
     const NO_CACHE_COOKIE = 'wordpress_logged_in_nocache';
+
+    const USERNAME_COOKIE = 'bp_cl_oauth_username';
 
     /**
      * The auth destination cookie key.
@@ -52,6 +55,11 @@ class AccessTokenService
             '/');
         setcookie(self::NO_CACHE_COOKIE, '1', self::accessTokenCookieLifetime(),
             '/');
+        $clRepo = new CommonLoginRepository();
+        $user = $clRepo->getUser($token);
+        if($user) {
+            setcookie(self::USERNAME_COOKIE, $user->first_name, self::accessTokenCookieLifetime(), '/');
+        }
     }
 
     /**
@@ -71,6 +79,7 @@ class AccessTokenService
         }
         setcookie(self::ACCESS_TOKEN_COOKIE_KEY, '', time() - 3600, '/');
         setcookie(self::NO_CACHE_COOKIE, '', time() - 3600, '/');
+        setcookie(self::USERNAME_COOKIE, '', time() - 3600, '/');
 
     }
 
