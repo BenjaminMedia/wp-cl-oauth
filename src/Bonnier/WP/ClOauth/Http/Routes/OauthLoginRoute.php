@@ -57,6 +57,11 @@ class OauthLoginRoute
     {
         $this->settings = $settings;
 
+        $accessToken = AccessTokenService::getTokenFromCookie();
+        if($accessToken) {
+            header('Cache-Control: no-cache');
+        }
+
         add_action('rest_api_init', function () {
             register_rest_route($this->get_route_namespace(), self::LOGIN_ROUTE, [
                 'methods' => 'GET, POST',
