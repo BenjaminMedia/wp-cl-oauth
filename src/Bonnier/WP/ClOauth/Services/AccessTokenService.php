@@ -24,6 +24,8 @@ class AccessTokenService
      */
     const ACCESS_TOKEN_COOKIE_KEY = 'bp_cl_oauth_token';
 
+    const NO_CACHE_COOKIE = 'wordpress_logged_in_nocache';
+
     /**
      * The auth destination cookie key.
      */
@@ -48,6 +50,8 @@ class AccessTokenService
     {
         setcookie(self::ACCESS_TOKEN_COOKIE_KEY, $token, self::accessTokenCookieLifetime(),
             '/');
+        setcookie(self::NO_CACHE_COOKIE, '1', self::accessTokenCookieLifetime(),
+            '/');
     }
 
     /**
@@ -66,6 +70,8 @@ class AccessTokenService
             unset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY]);
         }
         setcookie(self::ACCESS_TOKEN_COOKIE_KEY, '', time() - 3600, '/');
+        setcookie(self::NO_CACHE_COOKIE, '', time() - 3600, '/');
+
     }
 
     public static function ClassInstanceByToken($accessToken)
