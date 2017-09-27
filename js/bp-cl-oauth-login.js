@@ -93,7 +93,6 @@ function checkAccess(downloadTop, downloadBottom)
         if (request.status >= 200 && request.status < 400) {
             // Success!
             var data = JSON.parse(request.responseText);
-            console.log(data);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
                 setDownloadUrl(downloadTop, data.url);
                 setDownloadUrl(downloadBottom, data.url)

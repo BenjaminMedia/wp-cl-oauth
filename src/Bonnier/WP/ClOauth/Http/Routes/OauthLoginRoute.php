@@ -167,7 +167,6 @@ class OauthLoginRoute
         $purchaseId = $request->get_param('uid');
         if($this->clRepo->hasAccessTo($purchaseId)) {
             $url = as3cf_get_secure_attachment_url($id, 3600);
-            return new WP_REST_Response(['status' => 'OK', 'url' => $url]);
             if($url) {
                 return new WP_REST_Response(['status' => 'OK', 'url' => $url]);
             }
