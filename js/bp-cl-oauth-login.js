@@ -22,6 +22,11 @@ function bp_cl_oauth_trigger_logout(redirectOnComplete) {
     window.location = loginUri + '?redirectUri=' + encodeURIComponent(redirectOnComplete);
 }
 
+function getLoginUrl()
+{
+    return '/wp-json/bp-cl-oauth/v1/oauth/login?redirectUri=' + encodeURIComponent(document.location.href);
+}
+
 window.addEventListener('click', function (event) {
 
     var loginTriggerClass = 'bp-cl-oauth-login';
@@ -44,3 +49,71 @@ window.addEventListener('click', function (event) {
         }
     }
 });
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+function setDownloadUrl(el, url)
+{
+    if(!el) { return; }
+    el.setAttribute('href', url);
+    el.setAttribute('target', '_blank');
+    el.removeAttribute('data-toggle');
+    el.removeAttribute('data-target');
+}
+
+function checkAccess(downloadTop, downloadBottom)
+{
+    var id;
+    var uid;
+    if(downloadTop) {
+        id = downloadTop.getAttribute('data-id');
+        uid = downloadTop.getAttribute('data-uid');
+    } else {
+        id = downloadBottom.getAttribute('data-id');
+        uid = downloadBottom.getAttribute('data-uid');
+    }
+    var request = new XMLHttpRequest();
+    request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?id='+id+'&uid='+uid, true);
+
+    request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+            // Success!
+            var data = JSON.parse(request.responseText);
+            if(data.hasOwnProperty('status') && data.status === 'OK') {
+                setDownloadUrl(downloadTop, data.url);
+                setDownloadUrl(downloadBottom, data.url)
+            }
+        }
+    };
+    request.send();
+}
+
+window.onload = function() {
+    var loggedIn = getCookie('bp_cl_oauth_token');
+    var loginBtn = document.getElementById('user-navigation-btn');
+    if (loggedIn) {
+        document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
+        loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
+    } else {
+        loginBtn.setAttribute('href', getLoginUrl());
+    }
+    var downloadTop = document.getElementById('download-article-btn-top');
+    var downloadBottom = document.getElementById('download-article-btn-bottom');
+    if(downloadTop || downloadBottom) {
+        checkAccess(downloadTop, downloadBottom);
+    }
+};
