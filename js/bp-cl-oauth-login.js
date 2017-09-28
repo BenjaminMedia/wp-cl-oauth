@@ -27,6 +27,11 @@ function getLoginUrl()
     return '/wp-json/bp-cl-oauth/v1/oauth/login?redirectUri=' + encodeURIComponent(document.location.href);
 }
 
+function getLogoutUrl()
+{
+    return '/wp-json/bp-cl-oauth/v1/oauth/logout?redirectUri=' + encodeURIComponent(document.location.href);
+}
+
 window.addEventListener('click', function (event) {
 
     var loginTriggerClass = 'bp-cl-oauth-login';
@@ -91,7 +96,6 @@ function checkAccess(downloadTop, downloadBottom)
 
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
-            // Success!
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
                 setDownloadUrl(downloadTop, data.url);
@@ -104,11 +108,15 @@ function checkAccess(downloadTop, downloadBottom)
 
 var loggedIn = getCookie('bp_cl_oauth_token');
 var loginBtn = document.getElementById('user-navigation-btn');
+var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
 if (loggedIn) {
     document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
     loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
+    mobileLoginBtn.setAttribute('href', getLogoutUrl());
+    document.getElementById('user-mobile-navigation-label').innerHTML = 'Logout';
 } else {
     loginBtn.setAttribute('href', getLoginUrl());
+    mobileLoginBtn.setAttribute('href', getLoginUrl());
 }
 var downloadTop = document.getElementById('download-article-btn-top');
 var downloadBottom = document.getElementById('download-article-btn-bottom');
