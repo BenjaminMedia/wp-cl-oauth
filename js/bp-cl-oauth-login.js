@@ -102,18 +102,16 @@ function checkAccess(downloadTop, downloadBottom)
     request.send();
 }
 
-window.onload = function() {
-    var loggedIn = getCookie('bp_cl_oauth_token');
-    var loginBtn = document.getElementById('user-navigation-btn');
-    if (loggedIn) {
-        document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
-        loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
-    } else {
-        loginBtn.setAttribute('href', getLoginUrl());
-    }
-    var downloadTop = document.getElementById('download-article-btn-top');
-    var downloadBottom = document.getElementById('download-article-btn-bottom');
-    if(downloadTop || downloadBottom) {
-        checkAccess(downloadTop, downloadBottom);
-    }
-};
+var loggedIn = getCookie('bp_cl_oauth_token');
+var loginBtn = document.getElementById('user-navigation-btn');
+if (loggedIn) {
+    document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
+    loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
+} else {
+    loginBtn.setAttribute('href', getLoginUrl());
+}
+var downloadTop = document.getElementById('download-article-btn-top');
+var downloadBottom = document.getElementById('download-article-btn-bottom');
+if(downloadTop || downloadBottom) {
+    checkAccess(downloadTop, downloadBottom);
+}
