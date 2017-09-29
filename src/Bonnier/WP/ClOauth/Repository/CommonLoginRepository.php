@@ -102,11 +102,7 @@ class CommonLoginRepository
      */
     public function isAuthenticated()
     {
-        if ($this->getUser()) {
-            return true;
-        }
-
-        return false;
+        return isset($_COOKIE[AccessTokenService::ACCESS_TOKEN_COOKIE_KEY]) && $_COOKIE[AccessTokenService::ACCESS_TOKEN_COOKIE_KEY];
     }
 
     /**
