@@ -80,16 +80,19 @@ function setDownloadUrl(el, url)
     el.removeAttribute('data-target');
 }
 
-function checkAccess(downloadTop, downloadBottom)
+function checkAccess(downloadTop, downloadBottom, downloadGallery)
 {
     var id;
     var uid;
     if(downloadTop) {
         id = downloadTop.getAttribute('data-id');
         uid = downloadTop.getAttribute('data-uid');
-    } else {
+    } else if(downloadBottom) {
         id = downloadBottom.getAttribute('data-id');
         uid = downloadBottom.getAttribute('data-uid');
+    } else {
+        id = downloadGallery.getAttribute('data-id');
+        uid = downloadGallery.getAttribute('data-uid');
     }
     var request = new XMLHttpRequest();
     request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?id='+id+'&uid='+uid, true);
@@ -99,7 +102,8 @@ function checkAccess(downloadTop, downloadBottom)
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
                 setDownloadUrl(downloadTop, data.url);
-                setDownloadUrl(downloadBottom, data.url)
+                setDownloadUrl(downloadBottom, data.url);
+                setDownloadUrl(downloadGallery, data.url);
             }
         }
     };
@@ -120,6 +124,7 @@ if (loggedIn) {
 }
 var downloadTop = document.getElementById('download-article-btn-top');
 var downloadBottom = document.getElementById('download-article-btn-bottom');
-if(downloadTop || downloadBottom) {
-    checkAccess(downloadTop, downloadBottom);
+var downloadGallery = document.getElementById('download-article-btn-gallery');
+if(downloadTop || downloadBottom || downloadGallery) {
+    checkAccess(downloadTop, downloadBottom, downloadGallery);
 }
