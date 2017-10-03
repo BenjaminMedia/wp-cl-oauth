@@ -78,6 +78,14 @@ function setDownloadUrl(el, url)
     el.setAttribute('target', '_blank');
     el.removeAttribute('data-toggle');
     el.removeAttribute('data-target');
+    el.removeAttribute('disabled');
+}
+
+function setPaywall(el) {
+    if(!el) { return; }
+    el.setAttribute('data-target', '#modalPaywall');
+    el.setAttribute('data-toggle', 'modal');
+    el.removeAttribute('disabled');
 }
 
 function checkAccess(downloadTop, downloadBottom, downloadGallery)
@@ -104,6 +112,10 @@ function checkAccess(downloadTop, downloadBottom, downloadGallery)
                 setDownloadUrl(downloadTop, data.url);
                 setDownloadUrl(downloadBottom, data.url);
                 setDownloadUrl(downloadGallery, data.url);
+            } else {
+                setPaywall(downloadTop);
+                setPaywall(downloadBottom);
+                setPaywall(downloadGallery);
             }
         }
     };
