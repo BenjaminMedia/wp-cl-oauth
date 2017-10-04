@@ -30,15 +30,18 @@ class CommonLoginRepository
      * @return array|bool|mixed|object
      */
     public function getUserFromCacheOrSave($accessToken) {
+        if(!$accessToken) {
+            $accessToken = AccessTokenService::getAccessTokenFromStorage();
+        }
         if($accessToken instanceof AccessToken){
             $accessToken = $accessToken->getToken();
         }
-        $accessTokenKey = WpClOAuth::TEXT_DOMAIN.'-'.md5($accessToken);
-        if($user = wp_cache_get($accessTokenKey) ){
+        $accessTokenKey = md5($accessToken);
+        if($user = wp_cache_get($accessTokenKey, WpClOAuth::TEXT_DOMAIN ) ){
             return json_decode($user);
         }
         if($user = self::getUserByAccessToken($accessToken)){
-            wp_cache_set($accessTokenKey, json_encode($user), WpClOAuth::TEXT_DOMAIN ,
+            wp_cache_set($accessTokenKey, json_encode($user), WpClOAuth::TEXT_DOMAIN,
                 self::getUserCacheLifeTime());
             return $user;
         }
