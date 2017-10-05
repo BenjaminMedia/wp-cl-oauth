@@ -139,7 +139,7 @@ if (loggedIn) {
 } else {
     loginBtn.setAttribute('href', getLoginUrl());
     mobileLoginBtn.setAttribute('href', getLoginUrl());
-    downloadTop.removeAttribute('disabled');
-    downloadBottom.removeAttribute('disabled');
-    downloadGallery.removeAttribute('disabled');
+    setPaywall(downloadTop);
+    setPaywall(downloadGallery);
+    setPaywall(downloadBottom);
 }
