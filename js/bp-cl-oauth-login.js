@@ -125,18 +125,21 @@ function checkAccess(downloadTop, downloadBottom, downloadGallery)
 var loggedIn = getCookie('bp_cl_oauth_token');
 var loginBtn = document.getElementById('user-navigation-btn');
 var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
+var downloadTop = document.getElementById('download-article-btn-top');
+var downloadBottom = document.getElementById('download-article-btn-bottom');
+var downloadGallery = document.getElementById('download-article-btn-gallery');
 if (loggedIn) {
     document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
     loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
     mobileLoginBtn.setAttribute('href', getLogoutUrl());
     document.getElementById('user-mobile-navigation-label').innerHTML = 'Logout';
+    if(downloadTop || downloadBottom || downloadGallery) {
+        checkAccess(downloadTop, downloadBottom, downloadGallery);
+    }
 } else {
     loginBtn.setAttribute('href', getLoginUrl());
     mobileLoginBtn.setAttribute('href', getLoginUrl());
-}
-var downloadTop = document.getElementById('download-article-btn-top');
-var downloadBottom = document.getElementById('download-article-btn-bottom');
-var downloadGallery = document.getElementById('download-article-btn-gallery');
-if(downloadTop || downloadBottom || downloadGallery) {
-    checkAccess(downloadTop, downloadBottom, downloadGallery);
+    downloadTop.removeAttribute('disabled');
+    downloadBottom.removeAttribute('disabled');
+    downloadGallery.removeAttribute('disabled');
 }

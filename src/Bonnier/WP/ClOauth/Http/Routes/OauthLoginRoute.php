@@ -62,6 +62,8 @@ class OauthLoginRoute
      */
     public function __construct(SettingsPage $settings)
     {
+        header('Cache-Control: no-cache');
+
         $this->settings = $settings;
         $this->clRepo = new CommonLoginRepository();
 
