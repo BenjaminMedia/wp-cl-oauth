@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Bonnier Common Login OAuth
- * Version: 1.2.8
+ * Version: 1.3.0
  * Plugin URI: https://github.com/BenjaminMedia/wp-cl-oauth
  * Description: This plugin allows you to integrate your site with the whitealbum oauth user api
  * Author: Bonnier - Frederik Rabøl
