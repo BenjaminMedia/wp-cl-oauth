@@ -62,8 +62,6 @@ class OauthLoginRoute
      */
     public function __construct(SettingsPage $settings)
     {
-        header('Cache-Control: no-cache');
-
         $this->settings = $settings;
         $this->clRepo = new CommonLoginRepository();
 
@@ -91,6 +89,7 @@ class OauthLoginRoute
      */
     public function login(WP_REST_Request $request)
     {
+        header('Cache-Control: no-cache');
 
         $redirectUri = $request->get_param('redirectUri'); // Where should we return on successful login
         $state = $request->get_param('state'); // Login: 'undefined'
@@ -146,7 +145,9 @@ class OauthLoginRoute
      * @param WP_REST_Request $request
      * @return WP_REST_Response
      */
-    public function logout(WP_REST_Request $request) {
+    public function logout(WP_REST_Request $request) 
+    {
+        header('Cache-Control: no-cache');
 
         AccessTokenService::destroyAccessTokenCookie();
 
@@ -165,6 +166,8 @@ class OauthLoginRoute
 
     public function has_access(WP_REST_Request $request)
     {
+        header('Cache-Control: no-cache');
+        
         $id = $request->get_param('id');
         $purchaseId = $request->get_param('uid');
         if($this->clRepo->hasAccessTo($purchaseId)) {
