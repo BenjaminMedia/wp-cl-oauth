@@ -75,8 +75,6 @@ function setDownloadUrl(downloadBtns, url)
 {
     if(!downloadBtns.length) { return; }
     Array.prototype.forEach.call(downloadBtns, function(el, i) {
-        console.log("SET DOWNLOAD URL");
-        console.dir(el);
         el.setAttribute('href', url);
         el.setAttribute('target', '_blank');
         el.removeAttribute('data-toggle');
@@ -87,7 +85,6 @@ function setDownloadUrl(downloadBtns, url)
 function setPaywall(downloadBtns) {
     if(!downloadBtns.length) { return; }
     Array.prototype.forEach.call(downloadBtns, function(el, i) {
-        console.log("SET PAYWALL");
         el.setAttribute('data-toggle', 'modal');
         el.removeAttribute('disabled');
     });
