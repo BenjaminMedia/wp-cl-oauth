@@ -71,37 +71,30 @@ function getCookie(cname) {
     return "";
 }
 
-function setDownloadUrl(el, url)
+function setDownloadUrl(downloadBtns, url)
 {
-    if(!el) { return; }
-    el.setAttribute('href', url);
-    el.setAttribute('target', '_blank');
-    el.removeAttribute('data-toggle');
-    el.removeAttribute('data-target');
-    el.removeAttribute('disabled');
+    if(!downloadBtns.length) { return; }
+    Array.prototype.forEach.call(downloadBtns, function(el, i) {
+        el.setAttribute('href', url);
+        el.setAttribute('target', '_blank');
+        el.removeAttribute('data-toggle');
+        el.removeAttribute('disabled');
+    });
 }
 
-function setPaywall(el) {
-    if(!el) { return; }
-    el.setAttribute('data-target', '#modalPaywall');
-    el.setAttribute('data-toggle', 'modal');
-    el.removeAttribute('disabled');
+function setPaywall(downloadBtns) {
+    if(!downloadBtns.length) { return; }
+    Array.prototype.forEach.call(downloadBtns, function(el, i) {
+        el.setAttribute('data-toggle', 'modal');
+        el.removeAttribute('disabled');
+    });
 }
 
-function checkAccess(downloadTop, downloadBottom, downloadGallery)
+function checkAccess(downloadBtns)
 {
-    var id;
-    var uid;
-    if(downloadTop) {
-        id = downloadTop.getAttribute('data-id');
-        uid = downloadTop.getAttribute('data-uid');
-    } else if(downloadBottom) {
-        id = downloadBottom.getAttribute('data-id');
-        uid = downloadBottom.getAttribute('data-uid');
-    } else {
-        id = downloadGallery.getAttribute('data-id');
-        uid = downloadGallery.getAttribute('data-uid');
-    }
+    var id = downloadBtns[0].getAttribute('data-id');
+    var uid = downloadBtns[0].getAttribute('data-uid');
+
     var request = new XMLHttpRequest();
     request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?id='+id+'&uid='+uid, true);
 
@@ -109,13 +102,9 @@ function checkAccess(downloadTop, downloadBottom, downloadGallery)
         if (request.status >= 200 && request.status < 400) {
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
-                setDownloadUrl(downloadTop, data.url);
-                setDownloadUrl(downloadBottom, data.url);
-                setDownloadUrl(downloadGallery, data.url);
+                setDownloadUrl(downloadBtns, data.url);
             } else {
-                setPaywall(downloadTop);
-                setPaywall(downloadBottom);
-                setPaywall(downloadGallery);
+                setPaywall(downloadBtns);
             }
         }
     };
@@ -125,21 +114,18 @@ function checkAccess(downloadTop, downloadBottom, downloadGallery)
 var loggedIn = getCookie('bp_cl_oauth_token');
 var loginBtn = document.getElementById('user-navigation-btn');
 var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
-var downloadTop = document.getElementById('download-article-btn-top');
-var downloadBottom = document.getElementById('download-article-btn-bottom');
-var downloadGallery = document.getElementById('download-article-btn-gallery');
+var downloadBtns = document.getElementsByClassName('download-article-button');
 if (loggedIn) {
     document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
     loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
     mobileLoginBtn.setAttribute('href', getLogoutUrl());
     document.getElementById('user-mobile-navigation-label').innerHTML = 'Logout';
-    if(downloadTop || downloadBottom || downloadGallery) {
-        checkAccess(downloadTop, downloadBottom, downloadGallery);
+    if(downloadBtns.length) {
+
+        checkAccess(downloadBtns);
     }
 } else {
     loginBtn.setAttribute('href', getLoginUrl());
     mobileLoginBtn.setAttribute('href', getLoginUrl());
-    setPaywall(downloadTop);
-    setPaywall(downloadGallery);
-    setPaywall(downloadBottom);
+    setPaywall(downloadBtns);
 }
