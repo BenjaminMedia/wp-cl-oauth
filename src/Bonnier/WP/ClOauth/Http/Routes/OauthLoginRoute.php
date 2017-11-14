@@ -167,13 +167,41 @@ class OauthLoginRoute
     public function has_access(WP_REST_Request $request)
     {
         header('Cache-Control: no-cache');
-        
-        $id = $request->get_param('id');
+
         $purchaseId = $request->get_param('uid');
+        $postId = $request->get_param('pid');
+
         if($this->clRepo->hasAccessTo($purchaseId)) {
-            $url = as3cf_get_secure_attachment_url($id, 3600);
-            if($url) {
-                return new WP_REST_Response(['status' => 'OK', 'url' => $url]);
+
+            $data = json_decode($request->get_param('data'), true);
+            $widgets = get_field('composite_content', $postId);
+
+            foreach($data as $key => $widgetBtn){
+                $type = $widgets[$widgetBtn['data-index']]['acf_fc_layout'];
+
+                if(isset($widgetBtn['data-index']) && $type === $widgetBtn['data-type']){
+                    switch ($type){
+                        case 'file' :
+                            $result[$key]['data-id'] = $widgetBtn['data-id'];
+                            $result[$key]['data-response'] = as3cf_get_secure_attachment_url($widgetBtn['data-id'], 3600);
+                            break;
+                        case 'video' :
+                            $result[$key]['data-id'] = $widgetBtn['data-id'];
+                            //TODO finish Video implementation
+                            $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['embed_url'];
+                            break;
+                        case 'link' :
+                            $result[$key]['data-id'] = $widgetBtn['data-id'];
+                            $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['url'];
+                            break;
+                        default:
+                            $result[$key]['data-id'] = $widgetBtn['data-id'];
+                            $result[$key]['data-response'] = false;
+                    }
+                }
+            }
+            if($result) {
+                return new WP_REST_Response(['status' => 'OK', 'response' => $result]);
             }
         }
 
