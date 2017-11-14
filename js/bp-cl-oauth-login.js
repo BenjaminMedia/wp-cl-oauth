@@ -71,14 +71,18 @@ function getCookie(cname) {
     return "";
 }
 
-function setDownloadUrl(downloadBtns, url)
+function setDownloadUrl(downloadBtns, response)
 {
     if(!downloadBtns.length) { return; }
-    Array.prototype.forEach.call(downloadBtns, function(el, i) {
-        el.setAttribute('href', url);
-        el.setAttribute('target', '_blank');
-        el.removeAttribute('data-toggle');
-        el.removeAttribute('disabled');
+
+    Array.prototype.forEach.call(response, function(btn, i) {
+        var newDownloadButton = document.querySelectorAll('[data-id="'+btn['data-id']+'"]');
+        Array.prototype.forEach.call(newDownloadButton, function(btnAfterResponse, j) {
+            btnAfterResponse.setAttribute('href', btn['data-response']);
+            btnAfterResponse.setAttribute('target', '_blank');
+            btnAfterResponse.removeAttribute('data-toggle');
+            btnAfterResponse.removeAttribute('disabled');
+        });
     });
 }
 
@@ -92,17 +96,32 @@ function setPaywall(downloadBtns) {
 
 function checkAccess(downloadBtns)
 {
-    var id = downloadBtns[0].getAttribute('data-id');
     var uid = downloadBtns[0].getAttribute('data-uid');
+    var pid = document.getElementsByClassName('modal');
+    pid = pid[0].getAttribute('data-content-id');
+    var downloadBtnsIds = [];
+
+    Array.prototype.forEach.call(downloadBtns, function(el, i) {
+        downloadBtnsIds[i] = {};
+        downloadBtnsIds[i]['data-id'] = el.getAttribute('data-id');
+        downloadBtnsIds[i]['data-index'] = el.getAttribute('data-index');
+        downloadBtnsIds[i]['data-type'] = el.getAttribute('data-type');
+    });
+
+    var uniqueDownloadBtns = downloadBtnsIds.filter(function(btn, index, self) {
+        return index === self.findIndex(function(t) {
+                return t['data-id'] === btn['data-id']
+            });
+    });
 
     var request = new XMLHttpRequest();
-    request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?id='+id+'&uid='+uid, true);
+    request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?uid='+uid+'&pid='+pid+'&data='+JSON.stringify(uniqueDownloadBtns), true);
 
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
-                setDownloadUrl(downloadBtns, data.url);
+                setDownloadUrl(uniqueDownloadBtns, data.response);
             } else {
                 setPaywall(downloadBtns);
             }
@@ -115,13 +134,14 @@ var loggedIn = getCookie('bp_cl_oauth_token');
 var loginBtn = document.getElementById('user-navigation-btn');
 var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
 var downloadBtns = document.getElementsByClassName('download-article-button');
+
 if (loggedIn) {
     document.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_cl_oauth_username');
     loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
     mobileLoginBtn.setAttribute('href', getLogoutUrl());
     document.getElementById('user-mobile-navigation-label').innerHTML = 'Logout';
-    if(downloadBtns.length) {
 
+    if(downloadBtns.length) {
         checkAccess(downloadBtns);
     }
 } else {
