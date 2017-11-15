@@ -172,31 +172,35 @@ class OauthLoginRoute
         $postId = $request->get_param('pid');
 
         if($this->clRepo->hasAccessTo($purchaseId)) {
-
             $data = json_decode($request->get_param('data'), true);
             $widgets = get_field('composite_content', $postId);
+            $result = [];
+            
+            if($data){
+                foreach($data as $key => $widgetBtn){
+                    $type = $widgets[$widgetBtn['data-index']]['acf_fc_layout'];
 
-            foreach($data as $key => $widgetBtn){
-                $type = $widgets[$widgetBtn['data-index']]['acf_fc_layout'];
-
-                if(isset($widgetBtn['data-index']) && $type === $widgetBtn['data-type']){
-                    switch ($type){
-                        case 'file' :
-                            $result[$key]['data-id'] = $widgetBtn['data-id'];
-                            $result[$key]['data-response'] = as3cf_get_secure_attachment_url($widgetBtn['data-id'], 3600);
-                            break;
-                        case 'video' :
-                            $result[$key]['data-id'] = $widgetBtn['data-id'];
-                            //TODO finish Video implementation
-                            $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['embed_url'];
-                            break;
-                        case 'link' :
-                            $result[$key]['data-id'] = $widgetBtn['data-id'];
-                            $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['url'];
-                            break;
-                        default:
-                            $result[$key]['data-id'] = $widgetBtn['data-id'];
-                            $result[$key]['data-response'] = false;
+                    if(isset($widgetBtn['data-index']) && $type === $widgetBtn['data-type']){
+                        switch ($type){
+                            case 'file' :
+                                $result[$key]['data-id'] = $widgetBtn['data-id'];
+                                $result[$key]['data-disclaimer'] = $widgetBtn['data-disclaimer'] ?? '0';
+                                $result[$key]['data-target'] = $widgetBtn['data-target'] ?? false;
+                                $result[$key]['data-response'] = as3cf_get_secure_attachment_url($widgetBtn['data-id'], 3600);
+                                break;
+                            case 'video' :
+                                $result[$key]['data-id'] = $widgetBtn['data-id'];
+                                //TODO finish Video implementation
+                                $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['embed_url'];
+                                break;
+                            case 'link' :
+                                $result[$key]['data-id'] = $widgetBtn['data-id'];
+                                $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['url'];
+                                break;
+                            default:
+                                $result[$key]['data-id'] = $widgetBtn['data-id'];
+                                $result[$key]['data-response'] = false;
+                        }
                     }
                 }
             }

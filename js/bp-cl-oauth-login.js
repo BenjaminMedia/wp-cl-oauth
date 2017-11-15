@@ -77,10 +77,20 @@ function setDownloadUrl(downloadBtns, response)
 
     Array.prototype.forEach.call(response, function(btn, i) {
         var newDownloadButton = document.querySelectorAll('[data-id="'+btn['data-id']+'"]');
+        //Get all buttons matched by response
         Array.prototype.forEach.call(newDownloadButton, function(btnAfterResponse, j) {
-            btnAfterResponse.setAttribute('href', btn['data-response']);
-            btnAfterResponse.setAttribute('target', '_blank');
-            btnAfterResponse.removeAttribute('data-toggle');
+            if(btn['data-disclaimer'] === "1")
+            {
+                btnAfterResponse.setAttribute('data-target', '#'+btn['data-target']+'-disclaimer');
+                var allDisclaimerBtns = document.getElementById(btn['data-target']+'-disclaimer-download');
+                allDisclaimerBtns.setAttribute('href', btn['data-response']);
+            }
+            else
+            {
+                btnAfterResponse.setAttribute('href', btn['data-response']);
+                btnAfterResponse.setAttribute('target', '_blank');
+                btnAfterResponse.removeAttribute('data-toggle');
+            }
             btnAfterResponse.removeAttribute('disabled');
         });
     });
@@ -97,7 +107,7 @@ function setPaywall(downloadBtns) {
 function checkAccess(downloadBtns)
 {
     var uid = downloadBtns[0].getAttribute('data-uid');
-    var pid = document.getElementsByClassName('modal');
+    var pid = document.querySelectorAll('[data-content-id]');
     pid = pid[0].getAttribute('data-content-id');
     var downloadBtnsIds = [];
 
@@ -106,6 +116,13 @@ function checkAccess(downloadBtns)
         downloadBtnsIds[i]['data-id'] = el.getAttribute('data-id');
         downloadBtnsIds[i]['data-index'] = el.getAttribute('data-index');
         downloadBtnsIds[i]['data-type'] = el.getAttribute('data-type');
+        if(el.getAttribute('data-type') === 'file')
+        {
+            downloadBtnsIds[i]['data-disclaimer'] = el.getAttribute('data-disclaimer');
+            //Remove hashtag
+            downloadBtnsIds[i]['data-target'] = el.getAttribute('data-target');
+            downloadBtnsIds[i]['data-target'] = downloadBtnsIds[i]['data-target'].replace(/^#/, '');
+        }
     });
 
     var uniqueDownloadBtns = downloadBtnsIds.filter(function(btn, index, self) {
