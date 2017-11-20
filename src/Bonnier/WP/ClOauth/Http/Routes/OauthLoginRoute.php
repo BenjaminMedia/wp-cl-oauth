@@ -193,9 +193,9 @@ class OauthLoginRoute
                     case 'video' :
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
                         preg_match("/src=\"(.*?)\"/", $widgets[$widgetBtn['data-index']]['embed_url'], $matches);
-                        /*if(!empty($matches)){
+                        if(!isset($matches[1])){
                             return;
-                        }*/
+                        }
                         $result[$key]['data-response'] = $matches[1];
                         $result[$key]['data-caption'] = $widgets[$widgetBtn['data-index']]["caption"];
                         break;
