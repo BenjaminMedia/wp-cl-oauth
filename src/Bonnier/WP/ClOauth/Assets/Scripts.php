@@ -17,6 +17,6 @@ class Scripts
 
         $script_src = $plugin->plugin_url . 'js/bp-cl-oauth-login.js';
 
-        wp_enqueue_script('bp-wa-oauth-login', $script_src, [], '1.3.3', true);
+        wp_enqueue_script('bp-wa-oauth-login', $script_src, [], '1.3.4', true);
     }
 }
