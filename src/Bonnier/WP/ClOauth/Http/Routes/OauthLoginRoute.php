@@ -100,7 +100,7 @@ class OauthLoginRoute
         // Persist auth destination
         // Check if auth destination has been set
         if(!$redirect = $this->clRepo->getAuthDestination()){
-           $redirect = $this->clRepo->setAuthDestination($redirectUri);
+            $redirect = $this->clRepo->setAuthDestination($redirectUri);
         }
 
         if(isset($accessToken) && !empty($accessToken)){
@@ -145,7 +145,7 @@ class OauthLoginRoute
      * @param WP_REST_Request $request
      * @return WP_REST_Response
      */
-    public function logout(WP_REST_Request $request) 
+    public function logout(WP_REST_Request $request)
     {
         header('Cache-Control: no-cache');
 
@@ -173,7 +173,7 @@ class OauthLoginRoute
         $data = json_decode($request->get_param('data'), true);
 
         if(!$this->clRepo->hasAccessTo($purchaseId) || !$data) {
-            return new WP_REST_Response(['status' => 'No Access']);
+            //return new WP_REST_Response(['status' => 'No Access']);
         }
 
         $widgets = get_field('composite_content', $postId);
@@ -192,8 +192,12 @@ class OauthLoginRoute
                         break;
                     case 'video' :
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
-                        //TODO finish Video implementation
-                        $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['embed_url'];
+                        preg_match("/src=\"(.*?)\"/", $widgets[$widgetBtn['data-index']]['embed_url'], $matches);
+                        /*if(!empty($matches)){
+                            return;
+                        }*/
+                        $result[$key]['data-response'] = $matches[1];
+                        $result[$key]['data-caption'] = $widgets[$widgetBtn['data-index']]["caption"];
                         break;
                     case 'link' :
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
