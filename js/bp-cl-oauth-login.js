@@ -88,12 +88,10 @@ function setDownloadUrl(downloadBtns, response)
             else
             {
                 var btnType = btnAfterResponse.getAttribute('data-type');
-                //allDisclaimerBtns.setAttribute('href', btn['data-response']);
                 if( btnType == 'video'){
                     videoModalTarget = btnAfterResponse.getAttribute('data-target');
                     btnAfterResponse.setAttribute('data-target',  videoModalTarget +'-video');
                     var videoModals = document.getElementById(videoModalTarget.replace(/^#/, '')+'-video');
-                    console.dir(videoModals);
                     //set the Iframe src attribute
                     var videoIframe = videoModals.querySelector('iframe');
                     videoIframe.setAttribute('src', btn['data-response']);

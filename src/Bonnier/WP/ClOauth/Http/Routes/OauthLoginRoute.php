@@ -173,7 +173,7 @@ class OauthLoginRoute
         $data = json_decode($request->get_param('data'), true);
 
         if(!$this->clRepo->hasAccessTo($purchaseId) || !$data) {
-            //return new WP_REST_Response(['status' => 'No Access']);
+            return new WP_REST_Response(['status' => 'No Access']);
         }
 
         $widgets = get_field('composite_content', $postId);
