@@ -87,9 +87,23 @@ function setDownloadUrl(downloadBtns, response)
             }
             else
             {
-                btnAfterResponse.setAttribute('href', btn['data-response']);
-                btnAfterResponse.setAttribute('target', '_blank');
-                btnAfterResponse.removeAttribute('data-toggle');
+                var btnType = btnAfterResponse.getAttribute('data-type');
+                if( btnType == 'video'){
+                    videoModalTarget = btnAfterResponse.getAttribute('data-target');
+                    btnAfterResponse.setAttribute('data-target',  videoModalTarget +'-video');
+                    var videoModals = document.getElementById(videoModalTarget.replace(/^#/, '')+'-video');
+                    //set the Iframe src attribute
+                    var videoIframe = videoModals.querySelector('iframe');
+                    videoIframe.setAttribute('src', btn['data-response']);
+                    //set the caption
+                    var videoCaption = videoModals.querySelector('div.caption');
+                    videoCaption.innerHTML = btn['data-caption'];
+                }
+                else {
+                    btnAfterResponse.setAttribute('href', btn['data-response']);
+                    btnAfterResponse.setAttribute('target', '_blank');
+                    btnAfterResponse.removeAttribute('data-toggle');
+                }
             }
             btnAfterResponse.removeAttribute('disabled');
         });
