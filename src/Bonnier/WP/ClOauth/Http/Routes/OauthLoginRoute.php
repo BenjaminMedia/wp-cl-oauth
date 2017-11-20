@@ -180,15 +180,17 @@ class OauthLoginRoute
         $result = [];
 
         foreach($data as $key => $widgetBtn){
+            //We use data-index to make sure we get the right widget, sometimes we have unlocked widgets which mixes the indexes.
             $type = $widgets[$widgetBtn['data-index']]['acf_fc_layout'];
 
             if(isset($widgetBtn['data-index']) && $type === $widgetBtn['data-type']){
                 switch ($type){
                     case 'file' :
+                        $fileId = $widgets[$widgetBtn['data-index']]['file']['ID'];
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
                         $result[$key]['data-disclaimer'] = $widgetBtn['data-disclaimer'] ?? '0';
                         $result[$key]['data-target'] = $widgetBtn['data-target'] ?? false;
-                        $result[$key]['data-response'] = as3cf_get_secure_attachment_url($widgetBtn['data-id'], 3600);
+                        $result[$key]['data-response'] = as3cf_get_secure_attachment_url($fileId, 3600);
                         break;
                     case 'video' :
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
@@ -202,6 +204,11 @@ class OauthLoginRoute
                     case 'link' :
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
                         $result[$key]['data-response'] = $widgets[$widgetBtn['data-index']]['url'];
+                        break;
+                    case 'image' :
+                        $imageId = $widgets[$widgetBtn['data-index']]['file'];
+                        $result[$key]['data-id'] = $widgetBtn['data-id'];
+                        $result[$key]['data-response'] = as3cf_get_secure_attachment_url($imageId, 3600);
                         break;
                     default:
                         $result[$key]['data-id'] = $widgetBtn['data-id'];
