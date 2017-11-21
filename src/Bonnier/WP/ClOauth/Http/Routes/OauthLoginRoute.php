@@ -133,7 +133,7 @@ class OauthLoginRoute
 
         if (!$redirect) {
             // Redirect to home page
-            $redirect = home_url('/');
+            $redirect = pll_home_url('/');
         }
 
         RedirectHelper::redirect($redirect);
