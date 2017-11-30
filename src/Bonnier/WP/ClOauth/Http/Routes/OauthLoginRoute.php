@@ -12,6 +12,7 @@ use Bonnier\WP\ClOauth\Settings\SettingsPage;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use WP_REST_Request;
 use WP_REST_Response;
+use App\Helpers\ImageHelper;
 
 /**
  * Class OauthLoginRoute
@@ -215,6 +216,29 @@ class OauthLoginRoute
                         $result[$key]['data-response'] = false;
                 }
             }
+        }
+
+        //Gallery hack.
+        if(isset($data[0]['data-type']) && $data[0]['data-type'] === 'gallery')
+        {
+            $galleryItems = [];
+            foreach($widgets as $key => $widget)
+            {
+                if($widget['acf_fc_layout'] === 'image')
+                {
+                    $imageId = $widget['file'];
+                    $imageUrl = as3cf_get_secure_attachment_url($imageId, 3600);
+                    $galleryItems[$key] = [
+                        'tag' => ImageHelper::getImageTagFromUrl($imageUrl),
+                        'url' => $imageUrl,
+                        'id' => $imageId,
+                        'caption' => ''
+                    ];
+                }
+            }
+
+            $result[0]['data-response'] = $galleryItems;
+            $result[0]['data-id'] = $data[0]['data-id'];
         }
 
         if($result) {

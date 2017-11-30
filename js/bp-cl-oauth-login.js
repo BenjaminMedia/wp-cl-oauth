@@ -117,14 +117,36 @@ function getCookie(cname) {
     return "";
 }
 
+function getGalleriesTags()
+{
+    var request = new XMLHttpRequest();
+    request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?uid='+uid+'&pid='+pid+'&data='+JSON.stringify(uniqueDownloadBtns), true);
+
+    request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+            console.log(request.responseText);
+
+            var data = JSON.parse(request.responseText);
+            if(data.hasOwnProperty('status') && data.status === 'OK') {
+                setDownloadUrl(uniqueDownloadBtns, data.response);
+            } else {
+                setPaywall(downloadBtns);
+            }
+        }
+    };
+    request.send();
+}
+
 function setDownloadUrl(downloadBtns, response)
 {
     if(!downloadBtns.length) { return; }
 
+    //console.log(response);
+
     Array.prototype.forEach.call(response, function(btn, i) {
         var newDownloadButton = document.querySelectorAll('[data-id="'+btn['data-id']+'"]');
         //Get all buttons matched by response
-        Array.prototype.forEach.call(newDownloadButton, function(btnAfterResponse, j) {
+        Array.prototype.forEach.call(newDownloadButton, function(btnAfterResponse, newBtnIndex) {
             if(btn['data-disclaimer'] === "1")
             {
                 btnAfterResponse.setAttribute('data-target', '#'+btn['data-target']+'-disclaimer');
@@ -134,7 +156,7 @@ function setDownloadUrl(downloadBtns, response)
             else
             {
                 var btnType = btnAfterResponse.getAttribute('data-type');
-                if( btnType == 'video'){
+                if( btnType === 'video'){
                     videoModalTarget = btnAfterResponse.getAttribute('data-target');
                     btnAfterResponse.setAttribute('data-target',  videoModalTarget +'-video');
                     var videoModals = document.getElementById(videoModalTarget.replace(/^#/, '')+'-video');
@@ -144,6 +166,127 @@ function setDownloadUrl(downloadBtns, response)
                     //set the caption
                     var videoCaption = videoModals.querySelector('div.caption');
                     videoCaption.innerHTML = btn['data-caption'];
+                }
+                else if(btnType === 'gallery' && btn['data-response']){
+
+                        galleryModalTarget = btnAfterResponse.getAttribute('data-target');
+                        btnAfterResponse.setAttribute('data-target',  galleryModalTarget);
+
+                        // btnAfterResponse.setAttribute('href', btn['data-response']);
+
+                        console.log(galleryModalTarget);
+
+                    var galleryContainer = document.getElementsByClassName('gallery-container');
+
+                        console.log('this is btn index = ' + btn['data-id'] + newBtnIndex);
+
+                        var images = (btn['data-response']);
+                        var galleryUuid = newBtnIndex === 0 ? btn['data-id'] : btn['data-id'] +'-'+ newBtnIndex;
+                        var html ='<div id="carousel-'+ galleryUuid +'" class="carousel slide gallery-carousel-extended" data-interval="false">';
+                            html +='<div class="carousel-inner" role="listbox">';
+
+                        Array.prototype.forEach.call(images, function(image, imageIndex){
+                            var firstGalleryItem = '';
+                            if(imageIndex === 0)
+                            {
+                                firstGalleryItem = 'active';
+                            }
+
+                            html += '<div class="item '+firstGalleryItem+'">';
+                            html +=     '<div class="exif-data-container">';
+                            html +=         '<div class="gallery-extended-title pull-left">TEST</div>';
+                            html +=          '<a href="" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">DOWNLOAD EXTENDED GALLERY (multi lang? ..)</a>';
+                            html +=     '</div>';
+
+
+                            html += image['tag'];
+
+
+                            html += '</div>';
+
+
+                            // }
+                        });
+
+                        if(images.length > 1)
+                        {
+                            html += '<a class="left carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="prev">';
+                            html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
+                            html += '<span class="sr-only">Previous</span>';
+                            html += '</a>';
+
+                            html += '<a class="right carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="next">';
+                            html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
+                            html += '<span class="sr-only">Next</span>';
+                            html += '</a>';
+                        }
+
+                        html += '<div class="clearfix">';
+                            html += '<div id="thumbcarousel-'+ galleryUuid +'" class="carousel slide" data-interval="false">';
+                                html += '<div class="carousel-inner">';
+
+                                    var chunkSize = 4;
+                                    var chunkPosition = 0;
+                                    var thumbnailsChunk = images.slice(chunkPosition, chunkSize);
+
+
+                                    var test = ['val1', 'val2', 'val3'];
+                                    console.log(test.slice(1));
+
+                                    console.log(images.slice(1, images.length));
+                                    console.log(thumbnailsChunk);
+
+
+                                    Array.prototype.chunk = function ( index ) {
+                                        if ( !this.length ) {
+                                            return [];
+                                        }
+                                        return [ this.slice( 0, index ) ].concat( this.slice(index).chunk(index) );
+                                    };
+
+                                    thumbnailsChunks = images.chunk(4);
+                                    console.log(thumbnailsChunks);
+
+                                    Array.prototype.forEach.call(thumbnailsChunks, function(thumbnailChunk, thumbnailChunkIndex){
+                                        console.log(thumbnailChunk);
+
+                                        var firstGalleryItem = '';
+                                        if(thumbnailChunkIndex === 0)
+                                        {
+                                            firstGalleryItem = 'active';
+                                        }
+
+                                        html += '<div class="item '+firstGalleryItem+'">';
+
+                                            Array.prototype.forEach.call(thumbnailChunk, function(thumbnail, thumbnailIndex){
+                                                html += '<div data-target="#carousel-'+ galleryUuid +'" data-slide-to="'+ (thumbnailChunkIndex * 4 + thumbnailIndex) +'" class="thumb">';
+                                                html += image['tag'];
+                                                html += '</div>';
+                                            });
+
+                                        html += '</div>';
+
+                                        //First index is 0, so we need to remove one in order to start the chunk from the correct position.
+                                        // chunkPosition = chunkPosition + chunkSize;
+                                        // console.log('chunk position = '+chunkPosition);
+                                        // thumbnailsChunk = images.slice(chunkPosition, chunkSize);
+                                        // console.log(thumbnailsChunk);
+
+
+                                        // console.log('duplicate data slide to = ' + (thumbnailsChunkIndex * 4 + thumbnailIndex));
+                                        // thumbnailIndex += 1;
+                                    });
+
+                                //End <div class="carousel-inner">
+                                html += '</div>';
+                        html += '</div></div>';
+
+                        galleryContainer[newBtnIndex].innerHTML = html;
+
+
+                    //Target gallery modal
+                    //console.log(btnType);
+                    //console.log(btn);
                 }
                 else {
                     btnAfterResponse.setAttribute('href', btn['data-response']);
@@ -196,6 +339,8 @@ function checkAccess(downloadBtns)
 
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
+            console.log(request.responseText);
+
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
                 setDownloadUrl(uniqueDownloadBtns, data.response);
