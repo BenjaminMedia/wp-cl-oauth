@@ -168,74 +168,61 @@ function setDownloadUrl(downloadBtns, response)
                     videoCaption.innerHTML = btn['data-caption'];
                 }
                 else if(btnType === 'gallery' && btn['data-response']){
+                    galleryModalTarget = btnAfterResponse.getAttribute('data-target');
+                    btnAfterResponse.setAttribute('data-target',  galleryModalTarget);
 
-                        galleryModalTarget = btnAfterResponse.getAttribute('data-target');
-                        btnAfterResponse.setAttribute('data-target',  galleryModalTarget);
+                    // btnAfterResponse.setAttribute('href', btn['data-response']);
 
-                        // btnAfterResponse.setAttribute('href', btn['data-response']);
-
-                        console.log(galleryModalTarget);
+                    console.log(galleryModalTarget);
 
                     var galleryContainer = document.getElementsByClassName('gallery-container');
 
-                        console.log('this is btn index = ' + btn['data-id'] + newBtnIndex);
+                    console.log('this is btn index = ' + btn['data-id'] + newBtnIndex);
 
-                        var images = (btn['data-response']);
-                        var galleryUuid = newBtnIndex === 0 ? btn['data-id'] : btn['data-id'] +'-'+ newBtnIndex;
-                        var html ='<div id="carousel-'+ galleryUuid +'" class="carousel slide gallery-carousel-extended" data-interval="false">';
-                            html +='<div class="carousel-inner" role="listbox">';
+                    var images = (btn['data-response']);
+                    var galleryUuid = newBtnIndex === 0 ? btn['data-id'] : btn['data-id'] +'-'+ newBtnIndex;
+                    var html ='<div id="carousel-'+ galleryUuid +'" class="carousel slide gallery-carousel-extended" data-interval="false">';
+                        html +='<div class="carousel-inner" role="listbox">';
 
-                        Array.prototype.forEach.call(images, function(image, imageIndex){
-                            var firstGalleryItem = '';
-                            if(imageIndex === 0)
+                            Array.prototype.forEach.call(images, function(image, imageIndex){
+                                var firstGalleryItem = '';
+                                if(imageIndex === 0)
+                                {
+                                    firstGalleryItem = 'active';
+                                }
+
+                                html += '<div class="item '+firstGalleryItem+'">';
+                                html +=     '<div class="exif-data-container">';
+                                html +=         '<div class="gallery-extended-title pull-left">TEST</div>';
+                                html +=          '<a href="" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">DOWNLOAD EXTENDED GALLERY (multi lang? ..)</a>';
+                                html +=     '</div>';
+
+
+                                html += image['tag'];
+
+
+                                html += '</div>';
+
+
+                                // }
+                            });
+
+                            if(images.length > 1)
                             {
-                                firstGalleryItem = 'active';
+                                html += '<a class="left carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="prev">';
+                                html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
+                                html += '<span class="sr-only">Previous</span>';
+                                html += '</a>';
+
+                                html += '<a class="right carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="next">';
+                                html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
+                                html += '<span class="sr-only">Next</span>';
+                                html += '</a>';
                             }
 
-                            html += '<div class="item '+firstGalleryItem+'">';
-                            html +=     '<div class="exif-data-container">';
-                            html +=         '<div class="gallery-extended-title pull-left">TEST</div>';
-                            html +=          '<a href="" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">DOWNLOAD EXTENDED GALLERY (multi lang? ..)</a>';
-                            html +=     '</div>';
-
-
-                            html += image['tag'];
-
-
-                            html += '</div>';
-
-
-                            // }
-                        });
-
-                        if(images.length > 1)
-                        {
-                            html += '<a class="left carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="prev">';
-                            html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
-                            html += '<span class="sr-only">Previous</span>';
-                            html += '</a>';
-
-                            html += '<a class="right carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="next">';
-                            html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
-                            html += '<span class="sr-only">Next</span>';
-                            html += '</a>';
-                        }
-
-                        html += '<div class="clearfix">';
+                            html += '<div class="clearfix">';
                             html += '<div id="thumbcarousel-'+ galleryUuid +'" class="carousel slide" data-interval="false">';
                                 html += '<div class="carousel-inner">';
-
-                                    var chunkSize = 4;
-                                    var chunkPosition = 0;
-                                    var thumbnailsChunk = images.slice(chunkPosition, chunkSize);
-
-
-                                    var test = ['val1', 'val2', 'val3'];
-                                    console.log(test.slice(1));
-
-                                    console.log(images.slice(1, images.length));
-                                    console.log(thumbnailsChunk);
-
 
                                     Array.prototype.chunk = function ( index ) {
                                         if ( !this.length ) {
@@ -243,13 +230,11 @@ function setDownloadUrl(downloadBtns, response)
                                         }
                                         return [ this.slice( 0, index ) ].concat( this.slice(index).chunk(index) );
                                     };
-
+                                    //Get an array of chunks (4 thumbnails for each)
                                     thumbnailsChunks = images.chunk(4);
-                                    console.log(thumbnailsChunks);
 
+                                    //Loop into the chunk of thumbnails. We show only 4 thumbnails under the main image.
                                     Array.prototype.forEach.call(thumbnailsChunks, function(thumbnailChunk, thumbnailChunkIndex){
-                                        console.log(thumbnailChunk);
-
                                         var firstGalleryItem = '';
                                         if(thumbnailChunkIndex === 0)
                                         {
@@ -258,35 +243,23 @@ function setDownloadUrl(downloadBtns, response)
 
                                         html += '<div class="item '+firstGalleryItem+'">';
 
+                                            //Get thumbnails from the chunk
                                             Array.prototype.forEach.call(thumbnailChunk, function(thumbnail, thumbnailIndex){
+                                                console.log(thumbnailChunkIndex * 4 + thumbnailIndex);
                                                 html += '<div data-target="#carousel-'+ galleryUuid +'" data-slide-to="'+ (thumbnailChunkIndex * 4 + thumbnailIndex) +'" class="thumb">';
-                                                html += image['tag'];
+                                                    html += thumbnail['tag'];
                                                 html += '</div>';
                                             });
 
                                         html += '</div>';
 
-                                        //First index is 0, so we need to remove one in order to start the chunk from the correct position.
-                                        // chunkPosition = chunkPosition + chunkSize;
-                                        // console.log('chunk position = '+chunkPosition);
-                                        // thumbnailsChunk = images.slice(chunkPosition, chunkSize);
-                                        // console.log(thumbnailsChunk);
-
-
-                                        // console.log('duplicate data slide to = ' + (thumbnailsChunkIndex * 4 + thumbnailIndex));
-                                        // thumbnailIndex += 1;
                                     });
-
-                                //End <div class="carousel-inner">
+                                <!-- /carousel-inner -->
                                 html += '</div>';
-                        html += '</div></div>';
+                            html += '</div></div>';<!-- /thumbcarousel --><!-- /clearfix -->
+                    html += '</div></div>';<!-- /carousel slide gallery-carousel-extended --><!-- /carousel-inner -->
 
-                        galleryContainer[newBtnIndex].innerHTML = html;
-
-
-                    //Target gallery modal
-                    //console.log(btnType);
-                    //console.log(btn);
+                    galleryContainer[newBtnIndex].innerHTML = html;
                 }
                 else {
                     btnAfterResponse.setAttribute('href', btn['data-response']);
