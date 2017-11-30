@@ -169,6 +169,7 @@ function setDownloadUrl(downloadBtns, response)
                 }
                 else if(btnType === 'gallery' && btn['data-response']){
                     galleryModalTarget = btnAfterResponse.getAttribute('data-target');
+                    console.log(galleryModalTarget);
                     btnAfterResponse.setAttribute('data-target',  galleryModalTarget);
 
                     // btnAfterResponse.setAttribute('href', btn['data-response']);
@@ -193,8 +194,8 @@ function setDownloadUrl(downloadBtns, response)
 
                                 html += '<div class="item '+firstGalleryItem+'">';
                                 html +=     '<div class="exif-data-container">';
-                                html +=         '<div class="gallery-extended-title pull-left">TEST</div>';
-                                html +=          '<a href="" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">DOWNLOAD EXTENDED GALLERY (multi lang? ..)</a>';
+                                html +=         '<div class="gallery-extended-title pull-left"></div>';
+                                html +=          '<a href="'+ image['url'] +'" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">DOWNLOAD EXTENDED GALLERY (multi lang? ..)</a>';
                                 html +=     '</div>';
                                     html += image['tag'];
                                 html += '</div>';
@@ -251,6 +252,19 @@ function setDownloadUrl(downloadBtns, response)
                                     });
                                 <!-- /carousel-inner -->
                                 html += '</div>';
+
+                                if(thumbnailsChunks.length > 1)
+                                {
+                                    html += '<a class="left carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" role="button" data-slide="prev">';
+                                    html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
+                                    html += '<span class="sr-only">Previous</span>';
+                                    html += '</a>';
+
+                                    html += '<a class="right carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" role="button" data-slide="next">';
+                                    html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
+                                    html += '<span class="sr-only">Next</span>';
+                                    html += '</a>';
+                                }
 
                             html += '</div></div>';<!-- /thumbcarousel --><!-- /clearfix -->
 
