@@ -141,8 +141,6 @@ function setDownloadUrl(downloadBtns, response)
 {
     if(!downloadBtns.length) { return; }
 
-    //console.log(response);
-
     Array.prototype.forEach.call(response, function(btn, i) {
         var newDownloadButton = document.querySelectorAll('[data-id="'+btn['data-id']+'"]');
         //Get all buttons matched by response
@@ -169,19 +167,12 @@ function setDownloadUrl(downloadBtns, response)
                 }
                 else if(btnType === 'gallery' && btn['data-response']){
                     galleryModalTarget = btnAfterResponse.getAttribute('data-target');
-                    console.log(galleryModalTarget);
-                    btnAfterResponse.setAttribute('data-target',  galleryModalTarget);
-
-                    // btnAfterResponse.setAttribute('href', btn['data-response']);
-
-                    console.log(galleryModalTarget);
+                    btnAfterResponse.setAttribute('data-target',  galleryModalTarget+'-gallery');
 
                     var galleryContainer = document.getElementsByClassName('gallery-container');
-
-                    console.log('this is btn index = ' + btn['data-id'] + newBtnIndex);
-
                     var images = (btn['data-response']);
                     var galleryUuid = newBtnIndex === 0 ? btn['data-id'] : btn['data-id'] +'-'+ newBtnIndex;
+
                     var html ='<div id="carousel-'+ galleryUuid +'" class="carousel slide gallery-carousel-extended" data-interval="false">';
                         html +='<div class="carousel-inner" role="listbox">';
 
@@ -195,7 +186,7 @@ function setDownloadUrl(downloadBtns, response)
                                 html += '<div class="item '+firstGalleryItem+'">';
                                 html +=     '<div class="exif-data-container">';
                                 html +=         '<div class="gallery-extended-title pull-left"></div>';
-                                html +=          '<a href="'+ image['url'] +'" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">DOWNLOAD EXTENDED GALLERY (multi lang? ..)</a>';
+                                html +=          '<a href="'+ image['url'] +'" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">'+translations['current_language']+'</a>';
                                 html +=     '</div>';
                                     html += image['tag'];
                                 html += '</div>';
@@ -232,22 +223,22 @@ function setDownloadUrl(downloadBtns, response)
                                     //Loop into the chunk of thumbnails. We show only 4 thumbnails under the main image.
                                     Array.prototype.forEach.call(thumbnailsChunks, function(thumbnailChunk, thumbnailChunkIndex){
                                         var firstGalleryItem = '';
+                                        if(thumbnailChunkIndex === 0)
+                                        {
+                                            firstGalleryItem = 'active';
+                                        }
+
+                                        html += '<div class="item '+firstGalleryItem+'">';
+
                                             //Get thumbnails from the chunk
                                             Array.prototype.forEach.call(thumbnailChunk, function(thumbnail, thumbnailIndex){
-                                                if(thumbnailChunkIndex === 0)
-                                                {
-                                                    firstGalleryItem = 'active';
-                                                }
-
-                                                html += '<div class="item '+firstGalleryItem+'">';
-                                                console.log(thumbnailChunkIndex * 4 + thumbnailIndex);
                                                 html += '<div data-target="#carousel-'+ galleryUuid +'" data-slide-to="'+ (thumbnailChunkIndex * 4 + thumbnailIndex) +'" class="thumb">';
                                                     html += thumbnail['tag'];
                                                 html += '</div>';
 
-                                                html += '</div>';
                                             });
 
+                                        html += '</div>';<!-- /item -->
 
                                     });
                                 <!-- /carousel-inner -->
@@ -255,12 +246,12 @@ function setDownloadUrl(downloadBtns, response)
 
                                 if(thumbnailsChunks.length > 1)
                                 {
-                                    html += '<a class="left carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" role="button" data-slide="prev">';
+                                    html += '<a class="left carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" data-slide="prev">';
                                     html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
                                     html += '<span class="sr-only">Previous</span>';
                                     html += '</a>';
 
-                                    html += '<a class="right carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" role="button" data-slide="next">';
+                                    html += '<a class="right carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" data-slide="next">';
                                     html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
                                     html += '<span class="sr-only">Next</span>';
                                     html += '</a>';
@@ -321,8 +312,6 @@ function checkAccess(downloadBtns)
 
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
-            console.log(request.responseText);
-
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
                 setDownloadUrl(uniqueDownloadBtns, data.response);
