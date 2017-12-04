@@ -228,7 +228,7 @@ class OauthLoginRoute
                 {
                     $imageId = $widget['file'];
                     $imageUrl = as3cf_get_secure_attachment_url($imageId, 3600);
-                    $galleryItems[$key] = [
+                    $galleryItems[] = [
                         'tag' => ImageHelper::getImageTagFromUrl($imageUrl),
                         'url' => $imageUrl,
                         'id' => $imageId,
