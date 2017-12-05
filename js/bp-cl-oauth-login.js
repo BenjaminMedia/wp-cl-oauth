@@ -124,8 +124,6 @@ function getGalleriesTags()
 
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
-            console.log(request.responseText);
-
             var data = JSON.parse(request.responseText);
             if(data.hasOwnProperty('status') && data.status === 'OK') {
                 setDownloadUrl(uniqueDownloadBtns, data.response);
