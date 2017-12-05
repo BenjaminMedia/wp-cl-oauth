@@ -117,6 +117,24 @@ function getCookie(cname) {
     return "";
 }
 
+function getGalleriesTags()
+{
+    var request = new XMLHttpRequest();
+    request.open('GET', '/wp-json/bp-cl-oauth/v1/has-access?uid='+uid+'&pid='+pid+'&data='+JSON.stringify(uniqueDownloadBtns), true);
+
+    request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+            var data = JSON.parse(request.responseText);
+            if(data.hasOwnProperty('status') && data.status === 'OK') {
+                setDownloadUrl(uniqueDownloadBtns, data.response);
+            } else {
+                setPaywall(downloadBtns);
+            }
+        }
+    };
+    request.send();
+}
+
 function setDownloadUrl(downloadBtns, response)
 {
     if(!downloadBtns.length) { return; }
@@ -124,7 +142,7 @@ function setDownloadUrl(downloadBtns, response)
     Array.prototype.forEach.call(response, function(btn, i) {
         var newDownloadButton = document.querySelectorAll('[data-id="'+btn['data-id']+'"]');
         //Get all buttons matched by response
-        Array.prototype.forEach.call(newDownloadButton, function(btnAfterResponse, j) {
+        Array.prototype.forEach.call(newDownloadButton, function(btnAfterResponse, newBtnIndex) {
             if(btn['data-disclaimer'] === "1")
             {
                 btnAfterResponse.setAttribute('data-target', '#'+btn['data-target']+'-disclaimer');
@@ -134,7 +152,7 @@ function setDownloadUrl(downloadBtns, response)
             else
             {
                 var btnType = btnAfterResponse.getAttribute('data-type');
-                if( btnType == 'video'){
+                if( btnType === 'video'){
                     videoModalTarget = btnAfterResponse.getAttribute('data-target');
                     btnAfterResponse.setAttribute('data-target',  videoModalTarget +'-video');
                     var videoModals = document.getElementById(videoModalTarget.replace(/^#/, '')+'-video');
@@ -144,6 +162,102 @@ function setDownloadUrl(downloadBtns, response)
                     //set the caption
                     var videoCaption = videoModals.querySelector('div.caption');
                     videoCaption.innerHTML = btn['data-caption'];
+                }
+                else if(btnType === 'gallery' && btn['data-response']){
+                    galleryModalTarget = btnAfterResponse.getAttribute('data-target');
+                    btnAfterResponse.setAttribute('data-target',  galleryModalTarget+'-gallery');
+
+                    var galleryContainer = document.getElementsByClassName('gallery-container');
+                    var images = (btn['data-response']);
+                    var galleryUuid = newBtnIndex === 0 ? btn['data-id'] : btn['data-id'] +'-'+ newBtnIndex;
+
+                    var html ='<div id="carousel-'+ galleryUuid +'" class="carousel slide gallery-carousel-extended" data-interval="false">';
+                        html +='<div class="carousel-inner" role="listbox">';
+
+                            Array.prototype.forEach.call(images, function(image, imageIndex){
+                                var firstGalleryItem = '';
+                                if(imageIndex === 0)
+                                {
+                                    firstGalleryItem = 'active';
+                                }
+
+                                html += '<div class="item '+firstGalleryItem+'">';
+                                html +=     '<div class="exif-data-container">';
+                                html +=         '<div class="gallery-extended-title pull-left"></div>';
+                                html +=          '<a href="'+ image['url'] +'" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">'+translations['current_language']+'</a>';
+                                html +=     '</div>';
+                                    html += image['tag'];
+                                html += '</div>';
+                            });
+
+                        html += '</div>';<!-- /carousel-inner -->
+                        if(images.length > 1)
+                        {
+                            html += '<a class="left carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="prev">';
+                            html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
+                            html += '<span class="sr-only">Previous</span>';
+                            html += '</a>';
+
+                            html += '<a class="right carousel-control carousel-control-lg" href="#carousel-'+ galleryUuid +'" role="button" data-slide="next">';
+                            html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
+                            html += '<span class="sr-only">Next</span>';
+                            html += '</a>';
+                        }
+                        html += '</div>';<!-- /carousel slide gallery-carousel-extended -->
+
+                        html += '<div class="clearfix">';
+                            html += '<div id="thumbcarousel-'+ galleryUuid +'" class="carousel slide" data-interval="false">';
+                                html += '<div class="carousel-inner">';
+
+                                    Array.prototype.chunk = function ( index ) {
+                                        if ( !this.length ) {
+                                            return [];
+                                        }
+                                        return [ this.slice( 0, index ) ].concat( this.slice(index).chunk(index) );
+                                    };
+                                    //Get an array of chunks (4 thumbnails for each)
+                                    thumbnailsChunks = images.chunk(4);
+
+                                    //Loop into the chunk of thumbnails. We show only 4 thumbnails under the main image.
+                                    Array.prototype.forEach.call(thumbnailsChunks, function(thumbnailChunk, thumbnailChunkIndex){
+                                        var firstGalleryItem = '';
+                                        if(thumbnailChunkIndex === 0)
+                                        {
+                                            firstGalleryItem = 'active';
+                                        }
+
+                                        html += '<div class="item '+firstGalleryItem+'">';
+
+                                            //Get thumbnails from the chunk
+                                            Array.prototype.forEach.call(thumbnailChunk, function(thumbnail, thumbnailIndex){
+                                                html += '<div data-target="#carousel-'+ galleryUuid +'" data-slide-to="'+ (thumbnailChunkIndex * 4 + thumbnailIndex) +'" class="thumb">';
+                                                    html += thumbnail['tag'];
+                                                html += '</div>';
+
+                                            });
+
+                                        html += '</div>';<!-- /item -->
+
+                                    });
+                                <!-- /carousel-inner -->
+                                html += '</div>';
+
+                                if(thumbnailsChunks.length > 1)
+                                {
+                                    html += '<a class="left carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" data-slide="prev">';
+                                    html += '<span class="icon icon-chevron-left" aria-hidden="true"></span>';
+                                    html += '<span class="sr-only">Previous</span>';
+                                    html += '</a>';
+
+                                    html += '<a class="right carousel-control carousel-control-lg" href="#thumbcarousel-'+ galleryUuid +'" data-slide="next">';
+                                    html += '<span class="icon icon-chevron-right" aria-hidden="true"></span>';
+                                    html += '<span class="sr-only">Next</span>';
+                                    html += '</a>';
+                                }
+
+                            html += '</div></div>';<!-- /thumbcarousel --><!-- /clearfix -->
+
+                    galleryContainer[newBtnIndex].innerHTML = html;
                 }
                 else {
                     btnAfterResponse.setAttribute('href', btn['data-response']);
