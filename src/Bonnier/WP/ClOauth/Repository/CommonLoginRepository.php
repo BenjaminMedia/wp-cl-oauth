@@ -21,7 +21,7 @@ class CommonLoginRepository
     const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
 
     private $user;
-    
+
     /**
      * @param $request
      * @return array|bool|mixed|object
