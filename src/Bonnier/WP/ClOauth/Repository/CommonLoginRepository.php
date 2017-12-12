@@ -14,40 +14,14 @@ use League\OAuth2\Client\Token\AccessToken;
 class CommonLoginRepository
 {
     protected $oAuthService;
-    /**
-     * The access token cookie lifetime.
-     */
-    const USER_CACHE_LIFETIME_MINUTES = 10;
+
     /**
      * The auth destination cookie key.
      */
     const AUTH_DESTINATION_COOKIE_KEY = 'bp_cl_oauth_auth_destination';
 
     private $user;
-
-    /**
-     * @param $accessToken
-     * @return array|bool|mixed|object
-     */
-    public function getUserFromCacheOrSave($accessToken) {
-        if(!$accessToken) {
-            $accessToken = AccessTokenService::getAccessTokenFromStorage();
-        }
-        if($accessToken instanceof AccessToken){
-            $accessToken = $accessToken->getToken();
-        }
-        $accessTokenKey = md5($accessToken);
-        if($user = wp_cache_get($accessTokenKey, WpClOAuth::TEXT_DOMAIN ) ){
-            return json_decode($user);
-        }
-        if($user = self::getUserByAccessToken($accessToken)){
-            wp_cache_set($accessTokenKey, json_encode($user), WpClOAuth::TEXT_DOMAIN,
-                self::getUserCacheLifeTime());
-            return $user;
-        }
-        return false;
-    }
-
+    
     /**
      * @param $request
      * @return array|bool|mixed|object
@@ -60,7 +34,7 @@ class CommonLoginRepository
                 $accessToken = $this->getOAuthService()->getAccessToken('authorization_code', [
                     'code' => $grantToken
                 ]);
-                return CommonLoginRepository::getUserFromCacheOrSave(AccessTokenService::setAccessTokenToStorage($accessToken->getToken()));
+                return CommonLoginRepository::getUserByAccessToken(AccessTokenService::setAccessTokenToStorage($accessToken->getToken()));
             }
             catch(\Exception $exception) {
                 if(is_user_admin()){
@@ -71,11 +45,12 @@ class CommonLoginRepository
 
         return false;
     }
+
     /**
      * Get the currently signed in user.
      *
+     * @param bool $accessToken
      * @return mixed
-     * @throws Exception
      */
     public function getUser($accessToken = false)
     {
@@ -86,7 +61,7 @@ class CommonLoginRepository
             $accessToken = AccessTokenService::getAccessTokenFromStorage();
         }
 
-        if($user = $this->getUserFromCacheOrSave($accessToken)){
+        if($user = $this->getUserByAccessToken($accessToken)){
             $this->user = $user;
             return $user;
         }
@@ -193,18 +168,9 @@ class CommonLoginRepository
     }
 
     /**
-     * Gets the cookie lifetime
-     *
-     * @return int
-     */
-    private static function getUserCacheLifeTime()
-    {
-        return time() + (self::USER_CACHE_LIFETIME_MINUTES * 60);
-    }
-
-    /**
      * Get the currently signed in user.
      *
+     * @param bool $accessToken
      * @return mixed
      */
     public function getUserByAccessToken($accessToken = false)
