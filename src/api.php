@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Returns an instance of the bp-wa-oauth plugin
+ * Returns an instance of the bp-oauth plugin
  *
- * @return \Bonnier\WP\ClOauth\WpClOAuth|null
+ * @return \Bonnier\WP\OAuth\WpOAuth|null
  */
 function bp_cl_oauth()
 {
