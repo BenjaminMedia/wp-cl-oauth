@@ -13,6 +13,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use WP_REST_Request;
 use WP_REST_Response;
 use App\Helpers\ImageHelper;
+use App\Controllers\SingleContenthubComposite;
 
 /**
  * Class OauthLoginRoute
@@ -218,7 +219,7 @@ class OauthLoginRoute
             }
         }
 
-        //Gallery hack.
+        //Gallery SUPER hack.
         if(isset($data[0]['data-type']) && $data[0]['data-type'] === 'gallery')
         {
             $galleryItems = [];
@@ -232,13 +233,21 @@ class OauthLoginRoute
                         'tag' => ImageHelper::getImageTagFromUrl($imageUrl, ['class' => 'img-responsive'], true),
                         'url' => $imageUrl,
                         'id' => $imageId,
-                        'caption' => ''
+                        'caption' => '',
+                        'EXIF' => SingleContenthubComposite::getExifData(wp_get_attachment_image_url($imageId, 'full'))
                     ];
+
+                    $galleryIndex = sizeof($galleryItems)-1;
+                    if(isset($galleryItems[$galleryIndex]['EXIF']['EXIF']['FocalLength']))
+                    {
+                        $galleryItems[$galleryIndex]['EXIF']['EXIF']['FocalLength'] = SingleContenthubComposite::format_focal_length($galleryItems[$galleryIndex]['EXIF']['EXIF']['FocalLength']);
+                    }
                 }
             }
 
             $result[0]['data-response'] = $galleryItems;
             $result[0]['data-id'] = $data[0]['data-id'];
+            $result[0]['data-title'] = get_the_title($postId);
         }
 
         if($result) {

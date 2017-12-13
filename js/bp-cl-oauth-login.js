@@ -181,14 +181,74 @@ function setDownloadUrl(downloadBtns, response)
                                     firstGalleryItem = 'active';
                                 }
 
-                                html += '<div class="item '+firstGalleryItem+'">';
-                                html +=     '<div class="exif-data-container">';
-                                html +=         '<div class="gallery-extended-title pull-left"></div>';
-                                html +=          '<a href="'+ image['url'] +'" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">'+translations['current_language']+'</a>';
-                                html +=     '</div>';
-                                    html += image['tag'];
+                        html += '<div class="item '+firstGalleryItem+'">';
+                        html +=     '<div class="exif-data-container">';
+                        html +=         '<div class="gallery-extended-title pull-left">'+btn['data-title']+'</div>';
+                        html +=          '<a href="'+ image['url'] +'" class="btn btn-default btn-lg btn-call-to-action pull-right" target="_blank">'+translations['current_language']+'</a>';
+
+                        html +=          '<div class="gallery-extended-info pull-left">';
+                        html +=              '<div class="gallery-extended-exif-data">';
+
+                        console.log(image['EXIF']);
+
+                        if (typeof(image['EXIF']) !== 'undefined')
+                        {
+                            if(typeof(image['EXIF']['IFD0']) !== 'undefined' && typeof(image['EXIF']['IFD0']['Make']) !== 'undefined')
+                            {
+                                html += '<div class="pull-left">';
+                                html += '<div class="exif-data-key">Make:&nbsp;</div>';
+                                html += '<div class="exif-data-value">'+image['EXIF']['IFD0']['Make']+'</div>';
                                 html += '</div>';
-                            });
+                            }
+
+                            if(typeof(image['EXIF']['IFD0']) !== 'undefined' && typeof(image['EXIF']['IFD0']['Model']) !== 'undefined')
+                            {
+                                html += '<div class="pull-left">';
+                                html += '<div class="exif-data-key">Model:&nbsp;</div>';
+                                html += '<div class="exif-data-value">'+image['EXIF']['IFD0']['Model']+'</div>';
+                                html += '</div>';
+                            }
+
+                            if(typeof(image['EXIF']['COMPUTED']) !== 'undefined' && typeof(image['EXIF']['COMPUTED']['ApertureFNumber']) !== 'undefined')
+                            {
+                                html += '<div class="pull-left">';
+                                html += '<div class="exif-data-key">ApertureFNumber:&nbsp;</div>';
+                                html += '<div class="exif-data-value">'+image['EXIF']['COMPUTED']['ApertureFNumber']+'</div>';
+                                html += '</div>';
+                            }
+
+                            if(typeof(image['EXIF']['EXIF']) !== 'undefined' && typeof(image['EXIF']['EXIF']['ISOSpeedRatings']) !== 'undefined')
+                            {
+                                html += '<div class="pull-left">';
+                                html += '<div class="exif-data-key">ISOSpeedRatings:&nbsp;</div>';
+                                html += '<div class="exif-data-value">'+image['EXIF']['EXIF']['ISOSpeedRatings']+'</div>';
+                                html += '</div>';
+                            }
+
+                            if(typeof(image['EXIF']['EXIF']) !== 'undefined' && typeof(image['EXIF']['EXIF']['FocalLength']) !== 'undefined')
+                            {
+                                html += '<div class="pull-left">';
+                                html += '<div class="exif-data-key">FocalLength:&nbsp;</div>';
+                                html += '<div class="exif-data-value">'+image['EXIF']['EXIF']['FocalLength']+' mm</div>';
+                                html += '</div>';
+                            }
+
+                            if(typeof(image['EXIF']['EXIF']) !== 'undefined' && typeof(image['EXIF']['EXIF']['ShutterSpeedValue']) !== 'undefined')
+                            {
+                                html += '<div class="pull-left">';
+                                html += '<div class="exif-data-key">ShutterSpeedValue:&nbsp;</div>';
+                                html += '<div class="exif-data-value">'+image['EXIF']['EXIF']['ExposureTime']+' sec</div>';
+                                html += '</div>';
+                            }
+                        }
+
+                        html +=             '</div>';
+                        html +=          '</div>';
+
+                        html +=     '</div>';
+                        html += image['tag'];
+                        html += '</div>';
+                    });
 
                         html += '</div>';<!-- /carousel-inner -->
                         if(images.length > 1)
