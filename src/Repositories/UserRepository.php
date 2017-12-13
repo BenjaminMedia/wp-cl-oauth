@@ -1,5 +1,5 @@
 <?php
-namespace Bonnier\WP\OAuth\Repository;
+namespace Bonnier\WP\OAuth\Repositories;
 
 use Bonnier\WP\OAuth\Helpers\Base64;
 use Bonnier\WP\OAuth\Helpers\RedirectHelper;

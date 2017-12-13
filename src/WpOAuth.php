@@ -5,7 +5,7 @@ namespace Bonnier\WP\OAuth;
 use Bonnier\WP\OAuth\Assets\Scripts;
 use Bonnier\WP\OAuth\Http\Routes;
 use Bonnier\WP\OAuth\Providers\CommonLoginProvider;
-use Bonnier\WP\OAuth\Repository\UserRepository;
+use Bonnier\WP\OAuth\Repositories\UserRepository;
 use Bonnier\WP\OAuth\Settings\SettingsPage;
 
 class WpOAuth
