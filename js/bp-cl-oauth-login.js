@@ -188,9 +188,7 @@ function setDownloadUrl(downloadBtns, response)
 
                         html +=          '<div class="gallery-extended-info pull-left">';
                         html +=              '<div class="gallery-extended-exif-data">';
-
-                        console.log(image['EXIF']);
-
+                                
                         if (typeof(image['EXIF']) !== 'undefined')
                         {
                             if(typeof(image['EXIF']['IFD0']) !== 'undefined' && typeof(image['EXIF']['IFD0']['Make']) !== 'undefined')
