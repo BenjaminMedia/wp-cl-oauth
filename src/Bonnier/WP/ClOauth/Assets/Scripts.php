@@ -17,7 +17,7 @@ class Scripts
 
         $script_src = $plugin->plugin_url . 'js/bp-cl-oauth-login.js';
 
-        wp_register_script('bp-wa-oauth-login', $script_src, [], '1.3.8', true);
+        wp_register_script('bp-wa-oauth-login', $script_src, [], '1.3.9', true);
         wp_localize_script('bp-wa-oauth-login', 'translations', ['current_language' => pll__('Download Image')]);
         wp_enqueue_script('bp-wa-oauth-login');
     }
