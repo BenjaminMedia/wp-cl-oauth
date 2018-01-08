@@ -193,7 +193,7 @@ class SettingsPage
 
     public function get_api_endpoint($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('api_endpoint', $locale) ?: self::API_ENDPOINT_FALLBACK;
@@ -201,7 +201,7 @@ class SettingsPage
 
     public function get_api_user($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('api_key', $locale) ?: '';
@@ -209,7 +209,7 @@ class SettingsPage
 
     public function get_api_secret($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('api_secret', $locale) ?: '';
@@ -217,7 +217,7 @@ class SettingsPage
 
     public function get_required_user_role($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('user_role', $locale) ?: '';
@@ -225,7 +225,7 @@ class SettingsPage
 
     public function get_global_enable($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('global_enable', $locale) ?: '';
@@ -233,7 +233,7 @@ class SettingsPage
 
     public function get_create_local_user($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('create_local_user', $locale) ?: '';
@@ -241,7 +241,7 @@ class SettingsPage
 
     public function get_auto_login_local_user($locale = null)
     {
-        if(is_null($locale)) {
+        if(!$locale) {
             $locale = $this->get_current_locale();
         }
         return $this->get_setting_value('auto_login_local_user', $locale) ?: '';
