@@ -124,6 +124,16 @@ class Routes
             );
     }
 
+    public function getCallbackRoute()
+    {
+        return sprintf(
+            '/%s/%s/%s',
+            static::BASE_PREFIX,
+            static::PLUGIN_PREFIX,
+            trim(static::CALLBACK_ROUTE, '/')
+        );
+    }
+
     public function getLogoutRoute()
     {
         return sprintf(

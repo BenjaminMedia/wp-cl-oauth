@@ -144,12 +144,6 @@ class CommonLoginProvider extends AbstractProvider
             $homeUrl = home_url('/');
         }
 
-        return sprintf(
-            '%s/%s/%s/%s',
-            trim($homeUrl, '/'),
-            Routes::BASE_PREFIX,
-            Routes::PLUGIN_PREFIX,
-            trim(Routes::CALLBACK_ROUTE, '/')
-        );
+        return $homeUrl . WpOAuth::instance()->getRoutes()->getCallbackRoute();
     }
 }
