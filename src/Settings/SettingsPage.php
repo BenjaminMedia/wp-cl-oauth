@@ -193,57 +193,36 @@ class SettingsPage
 
     public function get_api_endpoint($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('api_endpoint', $locale) ?: self::API_ENDPOINT_FALLBACK;
     }
 
     public function get_api_user($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('api_key', $locale) ?: '';
     }
 
     public function get_api_secret($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('api_secret', $locale) ?: '';
     }
 
     public function get_required_user_role($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('user_role', $locale) ?: '';
     }
 
     public function get_global_enable($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('global_enable', $locale) ?: '';
     }
 
     public function get_create_local_user($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('create_local_user', $locale) ?: '';
     }
 
     public function get_auto_login_local_user($locale = null)
     {
-        if(!$locale) {
-            $locale = $this->get_current_locale();
-        }
         return $this->get_setting_value('auto_login_local_user', $locale) ?: '';
     }
 
