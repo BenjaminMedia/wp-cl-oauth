@@ -57,10 +57,10 @@ class WpOAuth
 
     private function bootstrap()
     {
+        $this->routes = new Routes();
         $this->settings = new SettingsPage();
         $this->userRepo = new UserRepository();
         $this->oauthProvider = new CommonLoginProvider();
-        $this->routes = new Routes();
 
         Scripts::bootstrap();
 
