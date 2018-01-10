@@ -27,10 +27,10 @@
     var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
 
     if (getCookie('bp_oauth_token')) {
-        loginBtn.getElementById('user-navigation-btn-username').innerHTML = getCookie('bp_oauth_username');
+        loginBtn.getElementsByTagName('span')[0].innerHTML = getCookie('bp_oauth_username');
         loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
         mobileLoginBtn.setAttribute('href', getLogoutUrl());
-        mobileLoginBtn.getElementById('user-mobile-navigation-label').innerHTML = 'Logout';
+        mobileLoginBtn.getElementsByTagName('span')[0].innerHTML = 'Logout';
     } else {
         loginBtn.setAttribute('href', getLoginUrl());
         mobileLoginBtn.setAttribute('href', getLoginUrl());
