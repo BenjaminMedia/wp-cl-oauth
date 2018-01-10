@@ -114,12 +114,6 @@ class Routes
         RedirectHelper::redirect($logoutUrl);
     }
 
-    public function user(WP_REST_Request $request)
-    {
-        NoCacheHeader::set();
-        return new WP_REST_Response($this->getUser());
-    }
-
     public function getLoginRoute()
     {
         return sprintf(
@@ -150,15 +144,5 @@ class Routes
     {
         return isset($_SESSION['oauth2state']) &&
             hash_equals($_SESSION['oauth2state'], $state);
-    }
-
-    /**
-     * Return the logged in user or null
-     *
-     * @return null
-     */
-    private function getUser()
-    {
-        return null;
     }
 }
