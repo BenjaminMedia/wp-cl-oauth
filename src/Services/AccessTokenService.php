@@ -12,7 +12,7 @@ class AccessTokenService
 
     const ACCESS_TOKEN_COOKIE_KEY = 'bp_oauth_token';
 
-    const EXPIRATION_COOKEY_KEY = 'bp_oauth_expires';
+    const EXPIRATION_COOKIE_KEY = 'bp_oauth_expires';
 
     const NO_CACHE_COOKIE = 'wordpress_logged_in_nocache';
 
@@ -21,7 +21,7 @@ class AccessTokenService
     public static function destroyCookies()
     {
         self::deleteCookie(self::ACCESS_TOKEN_COOKIE_KEY);
-        self::deleteCookie(self::EXPIRATION_COOKEY_KEY);
+        self::deleteCookie(self::EXPIRATION_COOKIE_KEY);
         self::deleteCookie(self::NO_CACHE_COOKIE);
         self::deleteCookie(self::USERNAME_COOKIE);
     }
@@ -58,7 +58,7 @@ class AccessTokenService
     private static function getTokenFromCookie()
     {
         if (isset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY])) {
-            return self::convertToInstance($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] ?? null, $_COOKIE[self::EXPIRATION_COOKEY_KEY] ?? null);
+            return self::convertToInstance($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] ?? null, $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null);
         }
 
         return null;
@@ -78,7 +78,7 @@ class AccessTokenService
             '/'
         );
         setcookie(
-            self::EXPIRATION_COOKEY_KEY,
+            self::EXPIRATION_COOKIE_KEY,
             self::cookieLifetime(),
             self::cookieLifetime(),
             '/'
