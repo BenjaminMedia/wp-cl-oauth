@@ -59,7 +59,7 @@ class Routes
      */
     public function login(WP_REST_Request $request)
     {
-        $redirect_uri = $request->get_param('redirect_uri') ?: $this->homeUrl;
+        $redirect_uri = urldecode($request->get_param('redirect_uri') ?: $this->homeUrl);
 
         if(AccessTokenService::isValid()) {
             RedirectHelper::redirect($redirect_uri);
@@ -96,8 +96,6 @@ class Routes
         RedirectHelper::redirect($_SESSION['oauth2redirect'] ?? $this->homeUrl);
     }
 
-
-
     /**
      * The function that handles the user logout request
      *
@@ -114,34 +112,38 @@ class Routes
         RedirectHelper::redirect($logoutUrl);
     }
 
-    public function getLoginRoute()
+    public function getRoute($route)
     {
         return sprintf(
             '/%s/%s/%s',
             static::BASE_PREFIX,
             static::PLUGIN_PREFIX,
-            trim(static::LOGIN_ROUTE, '/')
-            );
+            trim($route, '/')
+        );
+    }
+
+    public function getURI($route)
+    {
+        return sprintf(
+            '%s/%s',
+            trim($this->homeUrl,'/'),
+            trim($this->getRoute($route), '/')
+        );
+    }
+
+    public function getLoginRoute()
+    {
+        return $this->getRoute(static::LOGIN_ROUTE);
     }
 
     public function getCallbackRoute()
     {
-        return sprintf(
-            '/%s/%s/%s',
-            static::BASE_PREFIX,
-            static::PLUGIN_PREFIX,
-            trim(static::CALLBACK_ROUTE, '/')
-        );
+        return $this->getRoute(static::CALLBACK_ROUTE);
     }
 
     public function getLogoutRoute()
     {
-        return sprintf(
-            '/%s/%s/%s',
-            static::BASE_PREFIX,
-            static::PLUGIN_PREFIX,
-            trim(static::LOGOUT_ROUTE, '/')
-        );
+        return $this->getRoute(static::LOGOUT_ROUTE);
     }
 
     /**
