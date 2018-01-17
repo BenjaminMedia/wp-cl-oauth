@@ -27,10 +27,16 @@
     var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
 
     if (getCookie('bp_oauth_token')) {
-        loginBtn.getElementsByTagName('span')[0].innerHTML = getCookie('bp_oauth_username');
+        var loginBtnSpan = loginBtn.getElementsByTagName('span')[0];
+        if(typeof loginBtnSpan !== 'undefined') {
+            loginBtnSpan.innerHTML = getCookie('bp_oauth_username');
+        }
         loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
         mobileLoginBtn.setAttribute('href', getLogoutUrl());
-        mobileLoginBtn.getElementsByTagName('span')[0].innerHTML = 'Logout';
+        var mobileLoginBtnSpan = mobileLoginBtn.getElementsByTagName('span')[0];
+        if(typeof mobileLoginBtnSpan !== 'undefined') {
+            mobileLoginBtnSpan.innerHTML = 'Logout';
+        }
     } else {
         loginBtn.setAttribute('href', getLoginUrl());
         mobileLoginBtn.setAttribute('href', getLoginUrl());
