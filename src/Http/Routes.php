@@ -24,6 +24,8 @@ class Routes
     const CALLBACK_ROUTE = '/oauth/callback';
 
     const LOGOUT_ROUTE = '/oauth/logout';
+    
+    const SUBSCRIPTION_ROUTE = '/subscription_number';
 
     private $homeUrl;
 
@@ -48,6 +50,10 @@ class Routes
             register_rest_route(self::PLUGIN_PREFIX, self::LOGOUT_ROUTE, [
                 'methods' => 'GET, POST',
                 'callback' => [$this, 'logout'],
+            ]);
+            register_rest_route(self::PLUGIN_PREFIX, self::SUBSCRIPTION_ROUTE, [
+                'methods' => 'POST',
+                'callback' => [$this, 'subscription'],
             ]);
         });
     }
@@ -111,6 +117,18 @@ class Routes
 
         RedirectHelper::redirect($logoutUrl);
     }
+    
+    public function subscription(WP_REST_Request $request)
+    {
+        $subNo = $request->get_param('no');
+        if($subNo) {
+            if(WpOAuth::instance()->getOauthProvider()->updateSubscriptionNumber($subNo)) {
+                return new WP_REST_Response(['status' => 'OK']);
+            }
+        }
+        
+        return new WP_REST_Response(['status' => 'Failed'], 400);
+    }
 
     public function getRoute($route)
     {
@@ -144,6 +162,11 @@ class Routes
     public function getLogoutRoute()
     {
         return $this->getRoute(static::LOGOUT_ROUTE);
+    }
+    
+    public function getSubscriptionRoute()
+    {
+        return $this->getRoute(static::SUBSCRIPTION_ROUTE);
     }
 
     /**
