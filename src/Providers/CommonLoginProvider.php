@@ -6,6 +6,7 @@ namespace Bonnier\WP\OAuth\Providers;
 use Bonnier\WP\OAuth\Http\Routes;
 use Bonnier\WP\OAuth\Services\AccessTokenService;
 use Bonnier\WP\OAuth\WpOAuth;
+use GuzzleHttp\Exception\ClientException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
@@ -102,6 +103,28 @@ class CommonLoginProvider extends AbstractProvider
     protected function getDefaultScopes()
     {
         return [];
+    }
+    
+    public function updateSubscriptionNumber($subscriptionNumber)
+    {
+        $request = $this->getAuthenticatedRequest(
+            'post',
+            sprintf('%s/user/subscription_number', $this->endpoint),
+            AccessTokenService::getFromStorage()
+        );
+        try {
+            $response = $this->getHttpClient()->send($request, [
+                'form_params' => ['subscription_number' => $subscriptionNumber]
+            ]);
+        } catch(ClientException $e) {
+            return false;
+        }
+        $result = json_decode($response->getBody()->getContents());
+        if($result && 'success' == $result->status) {
+            return $result->subscription_number;
+        }
+        
+        return false;
     }
 
     /**
