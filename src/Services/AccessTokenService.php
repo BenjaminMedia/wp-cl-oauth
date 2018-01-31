@@ -145,7 +145,7 @@ class AccessTokenService
 
     private static function refreshToken(AccessToken $accessToken)
     {
-        if(!$accessToken->hasExpired()) {
+        if(!static::hasExpired()) {
             return $accessToken;
         }
         $refreshedAccessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('refresh_token', [
@@ -162,5 +162,11 @@ class AccessTokenService
 
             return null;
         }
+    }
+    
+    private static function hasExpired()
+    {
+        $expires = $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null;
+        return is_null($expires) || $expires < time();
     }
 }
