@@ -80,7 +80,7 @@ class AccessTokenService
         );
         setcookie(
             self::EXPIRATION_COOKIE_KEY,
-            self::cookieLifetime(),
+            $accessToken->getExpires(),
             self::cookieLifetime(),
             '/'
         );
@@ -129,53 +129,49 @@ class AccessTokenService
         if(!$accessToken) {
             return null;
         }
-
+        
         if($accessToken instanceof AccessToken) {
             return $accessToken;
         }
-
+        
         $options = [
             'access_token' => $accessToken,
         ];
         if($expires) {
             $options['expires_in'] = $expires;
         }
-
+        
         return new AccessToken($options);
     }
-
+    
     private static function refreshToken(AccessToken $accessToken)
     {
-        if(!static::hasExpired($accessToken)) {
+        if(!static::hasExpired()) {
             return $accessToken;
         }
+        
         $refreshedAccessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('refresh_token', [
             'refresh_token' => $accessToken->getRefreshToken()
         ]);
-
+        
         if($refreshedAccessToken && $refreshedAccessToken->getToken()) {
-
+            
             self::setCookie($refreshedAccessToken);
-
+            
             return $refreshedAccessToken;
         } else {
             self::destroyCookies();
-
+            
             return null;
         }
     }
     
     /**
-     * @param AccessToken $accessToken
      * @return bool
      */
-    private static function hasExpired(AccessToken $accessToken)
+    private static function hasExpired()
     {
-        try {
-            return $accessToken->hasExpired();
-        } catch(RuntimeException $e) {
-            $expires = $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null;
-            return is_null($expires) || $expires < time();
-        }
+        $expires = $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null;
+        return is_null($expires) || $expires < time();
     }
 }
