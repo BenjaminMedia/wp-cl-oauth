@@ -1,12 +1,10 @@
 <?php
 
-
 namespace Bonnier\WP\OAuth\Providers;
 
-use Bonnier\WP\OAuth\Http\Routes;
 use Bonnier\WP\OAuth\Services\AccessTokenService;
 use Bonnier\WP\OAuth\WpOAuth;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
@@ -31,7 +29,17 @@ class CommonLoginProvider extends AbstractProvider
             'redirectUri' => $this->getRedirectUri(),
         ]);
     }
-
+    
+    /**
+     * @return array
+     */
+    protected function getDefaultHeaders()
+    {
+        return [
+            'Accept' => 'application/json',
+        ];
+    }
+    
     /**
      * Returns the base URL for authorizing a client.
      *
@@ -116,7 +124,7 @@ class CommonLoginProvider extends AbstractProvider
             $response = $this->getHttpClient()->send($request, [
                 'form_params' => ['subscription_number' => $subscriptionNumber]
             ]);
-        } catch(ClientException $e) {
+        } catch(GuzzleException $e) {
             return false;
         }
         $result = json_decode($response->getBody()->getContents());
