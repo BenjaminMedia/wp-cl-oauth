@@ -5,52 +5,48 @@ namespace Bonnier\WP\OAuth\Services;
 use Bonnier\WP\OAuth\Providers\CommonLoginResourceOwner;
 use Bonnier\WP\OAuth\WpOAuth;
 use League\OAuth2\Client\Token\AccessToken;
-use RuntimeException;
 
 class AccessTokenService
 {
     const ACCESS_TOKEN_EXPIRES_DAYS = 15;
-
+    
     const ACCESS_TOKEN_COOKIE_KEY = 'bp_oauth_token';
-
-    const EXPIRATION_COOKIE_KEY = 'bp_oauth_expires';
-
+    
     const NO_CACHE_COOKIE = 'wordpress_logged_in_nocache';
-
+    
     const USERNAME_COOKIE = 'bp_oauth_username';
-
+    
     public static function destroyCookies()
     {
         self::deleteCookie(self::ACCESS_TOKEN_COOKIE_KEY);
-        self::deleteCookie(self::EXPIRATION_COOKIE_KEY);
         self::deleteCookie(self::NO_CACHE_COOKIE);
         self::deleteCookie(self::USERNAME_COOKIE);
     }
-
+    
     /**
      * @return AccessToken|null
      */
     public static function getFromStorage()
     {
-        if($accessToken = self::getTokenFromCookie()) {
+        if ($accessToken = self::getTokenFromCookie()) {
             return self::refreshToken($accessToken);
         }
         return null;
     }
-
+    
     public static function isValid()
     {
         return !is_null(self::getFromStorage());
     }
-
-
+    
+    
     public static function setToStorage(AccessToken $accessToken)
     {
         self::refreshToken($accessToken);
         self::setCookie($accessToken);
         return $accessToken;
     }
-
+    
     /**
      * Returns the current Access Token from a cookie or false
      *
@@ -59,12 +55,12 @@ class AccessTokenService
     private static function getTokenFromCookie()
     {
         if (isset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY])) {
-            return self::convertToInstance($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] ?? null, $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null);
+            return self::convertToInstance($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] ?? null);
         }
-
+        
         return null;
     }
-
+    
     /**
      * Stores the current Access Token in a cookie
      *
@@ -74,13 +70,7 @@ class AccessTokenService
     {
         setcookie(
             self::ACCESS_TOKEN_COOKIE_KEY,
-            $accessToken->getToken(),
-            self::cookieLifetime(),
-            '/'
-        );
-        setcookie(
-            self::EXPIRATION_COOKIE_KEY,
-            $accessToken->getExpires(),
+            json_encode($accessToken->jsonSerialize()),
             self::cookieLifetime(),
             '/'
         );
@@ -90,14 +80,14 @@ class AccessTokenService
             self::cookieLifetime(),
             '/'
         );
-
+        
         /** @var CommonLoginResourceOwner $user */
         $user = WpOAuth::instance()->getUserRepo()->getUser();
-        if($user) {
+        if ($user) {
             setcookie(self::USERNAME_COOKIE, $user->getFirstName(), self::cookieLifetime(), '/');
         }
     }
-
+    
     /**
      * Gets the cookie lifetime
      *
@@ -107,16 +97,16 @@ class AccessTokenService
     {
         return time() + (self::ACCESS_TOKEN_EXPIRES_DAYS * 24 * 60 * 60);
     }
-
+    
     private static function deleteCookie($key)
     {
-        if(isset($_COOKIE[$key])) {
+        if (isset($_COOKIE[$key])) {
             unset($_COOKIE[$key]);
         }
-
+        
         setcookie($key, '', time() - 3600, '/');
     }
-
+    
     /**
      * Convert access token string to AccessToken instance
      *
@@ -124,45 +114,40 @@ class AccessTokenService
      *
      * @return AccessToken|null
      */
-    private static function convertToInstance($accessToken, $expires = null)
+    private static function convertToInstance($accessToken)
     {
-        if(!$accessToken) {
+        if (!$accessToken) {
             return null;
         }
         
-        if($accessToken instanceof AccessToken) {
+        if ($accessToken instanceof AccessToken) {
             return $accessToken;
         }
         
-        $options = [
-            'access_token' => $accessToken,
-        ];
-        if($expires) {
-            $options['expires_in'] = $expires;
-        }
+        $accessToken = stripslashes($accessToken);
         
-        return new AccessToken($options);
+        return new AccessToken(json_decode($accessToken, $associativeArray = true));
     }
     
     private static function refreshToken(AccessToken $accessToken)
     {
-        if(!$accessToken->hasExpired()) {
+        if (!$accessToken->hasExpired()) {
             return $accessToken;
         }
         
-        $refreshedAccessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('refresh_token', [
-            'refresh_token' => $accessToken->getRefreshToken()
-        ]);
-        
-        if($refreshedAccessToken && $refreshedAccessToken->getToken()) {
+        if ($refreshToken = $accessToken->getRefreshToken()) {
+            $refreshedAccessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('refresh_token', [
+                'refresh_token' => $accessToken->getRefreshToken()
+            ]);
             
-            self::setCookie($refreshedAccessToken);
-            
-            return $refreshedAccessToken;
-        } else {
-            self::destroyCookies();
-            
-            return null;
+            if ($refreshedAccessToken && $refreshedAccessToken->getToken()) {
+                self::setCookie($refreshedAccessToken);
+                
+                return $refreshedAccessToken;
+            }
         }
+        self::destroyCookies();
+        
+        return null;
     }
 }
