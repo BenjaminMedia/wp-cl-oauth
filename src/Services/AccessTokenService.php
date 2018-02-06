@@ -5,6 +5,7 @@ namespace Bonnier\WP\OAuth\Services;
 use Bonnier\WP\OAuth\Providers\CommonLoginResourceOwner;
 use Bonnier\WP\OAuth\WpOAuth;
 use League\OAuth2\Client\Token\AccessToken;
+use RuntimeException;
 
 class AccessTokenService
 {
@@ -145,7 +146,7 @@ class AccessTokenService
 
     private static function refreshToken(AccessToken $accessToken)
     {
-        if(!static::hasExpired()) {
+        if(!static::hasExpired($accessToken)) {
             return $accessToken;
         }
         $refreshedAccessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('refresh_token', [
@@ -164,9 +165,17 @@ class AccessTokenService
         }
     }
     
-    private static function hasExpired()
+    /**
+     * @param AccessToken $accessToken
+     * @return bool
+     */
+    private static function hasExpired(AccessToken $accessToken)
     {
-        $expires = $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null;
-        return is_null($expires) || $expires < time();
+        try {
+            return $accessToken->hasExpired();
+        } catch(RuntimeException $e) {
+            $expires = $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null;
+            return is_null($expires) || $expires < time();
+        }
     }
 }
