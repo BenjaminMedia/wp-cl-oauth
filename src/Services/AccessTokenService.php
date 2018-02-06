@@ -146,7 +146,7 @@ class AccessTokenService
     
     private static function refreshToken(AccessToken $accessToken)
     {
-        if($accessToken->hasExpired()) {
+        if(!$accessToken->hasExpired()) {
             return $accessToken;
         }
         
