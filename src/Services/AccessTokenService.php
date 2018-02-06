@@ -146,7 +146,7 @@ class AccessTokenService
     
     private static function refreshToken(AccessToken $accessToken)
     {
-        if(!static::hasExpired()) {
+        if($accessToken->hasExpired()) {
             return $accessToken;
         }
         
@@ -164,14 +164,5 @@ class AccessTokenService
             
             return null;
         }
-    }
-    
-    /**
-     * @return bool
-     */
-    private static function hasExpired()
-    {
-        $expires = $_COOKIE[self::EXPIRATION_COOKIE_KEY] ?? null;
-        return is_null($expires) || $expires < time();
     }
 }
