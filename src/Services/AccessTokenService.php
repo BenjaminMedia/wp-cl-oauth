@@ -2,6 +2,7 @@
 
 namespace Bonnier\WP\OAuth\Services;
 
+use Bonnier\WP\OAuth\Helpers\RedirectHelper;
 use Bonnier\WP\OAuth\Providers\CommonLoginResourceOwner;
 use Bonnier\WP\OAuth\WpOAuth;
 use League\OAuth2\Client\Token\AccessToken;
@@ -123,10 +124,16 @@ class AccessTokenService
         if ($accessToken instanceof AccessToken) {
             return $accessToken;
         }
-        
+    
         $accessToken = stripslashes($accessToken);
-        
-        return new AccessToken(json_decode($accessToken, $associativeArray = true));
+    
+        $token = json_decode($accessToken, $associativeArray = true);
+        if(json_last_error() !== JSON_ERROR_NONE) {
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            RedirectHelper::redirect(WpOAuth::instance()->getRoutes()->getLogoutRoute() . '?redirect_uri=' . urlencode($protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        }
+    
+        return new AccessToken($token);
     }
     
     private static function refreshToken(AccessToken $accessToken)
