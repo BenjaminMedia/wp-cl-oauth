@@ -7,6 +7,7 @@ use Bonnier\WP\OAuth\Http\Routes;
 use Bonnier\WP\OAuth\Providers\CommonLoginProvider;
 use Bonnier\WP\OAuth\Repositories\UserRepository;
 use Bonnier\WP\OAuth\Settings\SettingsPage;
+use League\OAuth2\Client\Provider\AbstractProvider;
 
 class WpOAuth
 {
@@ -119,6 +120,38 @@ class WpOAuth
     public function getRoutes()
     {
         return $this->routes;
+    }
+    
+    /**
+     * @param SettingsPage $settings
+     */
+    public function setSettings(SettingsPage $settings): void
+    {
+        $this->settings = $settings;
+    }
+    
+    /**
+     * @param UserRepository $userRepo
+     */
+    public function setUserRepo(UserRepository $userRepo): void
+    {
+        $this->userRepo = $userRepo;
+    }
+    
+    /**
+     * @param AbstractProvider $oauthProvider
+     */
+    public function setOauthProvider(AbstractProvider $oauthProvider): void
+    {
+        $this->oauthProvider = $oauthProvider;
+    }
+    
+    /**
+     * @param Routes $routes
+     */
+    public function setRoutes(Routes $routes): void
+    {
+        $this->routes = $routes;
     }
 
     /**

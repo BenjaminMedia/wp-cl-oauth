@@ -2,11 +2,7 @@
 namespace Bonnier\WP\OAuth\Repositories;
 
 use Bonnier\WP\OAuth\Helpers\Base64;
-use Bonnier\WP\OAuth\Helpers\RedirectHelper;
 use Bonnier\WP\OAuth\Http\Client;
-use Bonnier\WP\OAuth\Http\Exceptions\HttpException;
-use Bonnier\WP\OAuth\Http\Routes\OauthLoginRoute;
-use Bonnier\WP\OAuth\Providers\CommonLoginProvider;
 use Bonnier\WP\OAuth\Providers\CommonLoginResourceOwner;
 use Bonnier\WP\OAuth\Services\AccessTokenService;
 use Bonnier\WP\OAuth\Services\CommonLoginOAuth;
@@ -101,10 +97,11 @@ class UserRepository
     {
         return time() + (self::USER_CACHE_LIFETIME_MINUTES * 60);
     }
-
+    
     /**
      * Get the currently signed in user.
      *
+     * @param AccessToken $accessToken
      * @return ResourceOwnerInterface
      */
     public function getUserByAccessToken(AccessToken $accessToken)
