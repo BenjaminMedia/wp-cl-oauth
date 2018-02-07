@@ -123,10 +123,15 @@ class AccessTokenService
         if ($accessToken instanceof AccessToken) {
             return $accessToken;
         }
-        
+    
         $accessToken = stripslashes($accessToken);
-        
-        return new AccessToken(json_decode($accessToken, $associativeArray = true));
+    
+        $token = json_decode($accessToken, $associativeArray = true);
+        if(json_last_error() !== JSON_ERROR_NONE) {
+            RedirectHelper::redirect(WpOAuth::instance()->getRoutes()->getLogoutRoute());
+        }
+    
+        return new AccessToken($token);
     }
     
     private static function refreshToken(AccessToken $accessToken)

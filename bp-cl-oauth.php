@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Bonnier OAuth Plugin
- * Version: 2.0.11
+ * Version: 2.0.12
  * Plugin URI: https://github.com/BenjaminMedia/wp-cl-oauth
  * Description: This plugin allows you to integrate your site with an OAuth2 service
  * Author: Bonnier
