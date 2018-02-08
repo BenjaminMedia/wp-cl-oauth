@@ -45,12 +45,17 @@ class UserRepository
     public function setUserFromAccessToken(AccessToken $accessToken)
     {
         $this->user = WpOAuth::instance()->getOauthProvider()->getResourceOwner($accessToken);
-        wp_cache_set(
-            md5($accessToken->getToken()),
-            json_encode($this->user->toArray()),
-            WpOAuth::TEXT_DOMAIN,
-            self::getUserCacheLifeTime()
-        );
+        if($this->user) {
+            wp_cache_set(
+                md5($accessToken->getToken()),
+                json_encode($this->user->toArray()),
+                WpOAuth::TEXT_DOMAIN,
+                self::getUserCacheLifeTime()
+            );
+            return true;
+        }
+        
+        return false;
     }
 
     /**
@@ -102,7 +107,7 @@ class UserRepository
      * Get the currently signed in user.
      *
      * @param AccessToken $accessToken
-     * @return ResourceOwnerInterface
+     * @return ResourceOwnerInterface|null
      */
     public function getUserByAccessToken(AccessToken $accessToken)
     {

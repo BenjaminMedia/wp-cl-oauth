@@ -2,8 +2,6 @@
 
 namespace Bonnier\WP\OAuth\Http;
 
-use Bonnier\WP\OAuth\Helpers\NoCacheHeader;
-use Bonnier\WP\OAuth\Helpers\RedirectHelper;
 use Bonnier\WP\OAuth\Http\Responses\NoCacheRedirectRestResponse;
 use Bonnier\WP\OAuth\Services\AccessTokenService;
 use Bonnier\WP\OAuth\WpOAuth;
@@ -96,11 +94,14 @@ class Routes
             'code' => $request->get_param('code') ?? null,
         ]);
 
-        WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken);
-
-        AccessTokenService::setToStorage($accessToken);
-    
-        return new NoCacheRedirectRestResponse($_SESSION['oauth2redirect'] ?? $this->homeUrl);
+        $redirect = $_SESSION['oauth2redirect'] ?? $this->homeUrl;
+        
+        if(WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
+            AccessTokenService::setToStorage($accessToken);
+            return new NoCacheRedirectRestResponse($redirect);
+        } else {
+            return $this->triggerLoginFailure($redirect);
+        }
     }
 
     /**
@@ -180,5 +181,16 @@ class Routes
     {
         return isset($_SESSION['oauth2state']) &&
             hash_equals($_SESSION['oauth2state'], $state);
+    }
+    
+    private function triggerLoginFailure($redirect)
+    {
+        $message = 'An error occured during login - please try again.';
+        if(function_exists('pll__') && function_exists('pll_register_string')) {
+            pll_register_string($message, $message);
+            $message = pll__($message);
+        }
+        setcookie('bp_oauth_fail', $message, time() + 120, '/'); //Expires in two minutes
+        return new NoCacheRedirectRestResponse($this->getLogoutRoute() . '?redirect_uri=' . urlencode($redirect));
     }
 }
