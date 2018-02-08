@@ -2,8 +2,7 @@
 
 namespace Bonnier\WP\OAuth\Http;
 
-use Bonnier\WP\OAuth\Helpers\NoCacheHeader;
-use Bonnier\WP\OAuth\Helpers\RedirectHelper;
+use Bonnier\WP\OAuth\Http\Responses\NoCacheRedirectRestResponse;
 use Bonnier\WP\OAuth\Services\AccessTokenService;
 use Bonnier\WP\OAuth\WpOAuth;
 use WP_REST_Request;
@@ -11,7 +10,7 @@ use WP_REST_Response;
 
 /**
  * Class Routes
- * @package Bonnier\WP\ClOauth\Http
+ * @package Bonnier\WP\Oauth\Http
  */
 class Routes
 {
@@ -68,15 +67,15 @@ class Routes
         $redirect_uri = urldecode($request->get_param('redirect_uri') ?: $this->homeUrl);
 
         if(AccessTokenService::isValid()) {
-            RedirectHelper::redirect($redirect_uri);
+            return new NoCacheRedirectRestResponse($redirect_uri);
         }
 
         $authUrl = WpOAuth::instance()->getOauthProvider()->getAuthorizationUrl();
 
         $_SESSION['oauth2state'] = WpOAuth::instance()->getOauthProvider()->getState();
         $_SESSION['oauth2redirect'] = $redirect_uri;
-
-        RedirectHelper::redirect($authUrl);
+        
+        return new NoCacheRedirectRestResponse($authUrl);
     }
 
     /**
@@ -88,18 +87,21 @@ class Routes
     {
         if(!$this->validateState($request->get_param('state') ?? null)) {
             // Request has been tinkered with - let's forget about it and return home.
-            RedirectHelper::redirect($this->homeUrl);
+            return new NoCacheRedirectRestResponse($this->homeUrl);
         }
 
         $accessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('authorization_code', [
             'code' => $request->get_param('code') ?? null,
         ]);
 
-        WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken);
-
-        AccessTokenService::setToStorage($accessToken);
-
-        RedirectHelper::redirect($_SESSION['oauth2redirect'] ?? $this->homeUrl);
+        $redirect = $_SESSION['oauth2redirect'] ?? $this->homeUrl;
+        
+        if(WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
+            AccessTokenService::setToStorage($accessToken);
+            return new NoCacheRedirectRestResponse($redirect);
+        } else {
+            return $this->triggerLoginFailure($redirect);
+        }
     }
 
     /**
@@ -114,8 +116,8 @@ class Routes
         $redirect_uri = $request->get_param('redirect_uri') ?? $this->homeUrl;
 
         $logoutUrl = WpOAuth::instance()->getOauthProvider()->getLogoutUrl($redirect_uri);
-
-        RedirectHelper::redirect($logoutUrl);
+    
+        return new NoCacheRedirectRestResponse($logoutUrl);
     }
     
     public function subscription(WP_REST_Request $request)
@@ -179,5 +181,16 @@ class Routes
     {
         return isset($_SESSION['oauth2state']) &&
             hash_equals($_SESSION['oauth2state'], $state);
+    }
+    
+    private function triggerLoginFailure($redirect)
+    {
+        $message = 'An error occured during login - please try again.';
+        if(function_exists('pll__') && function_exists('pll_register_string')) {
+            pll_register_string($message, $message);
+            $message = pll__($message);
+        }
+        setcookie('bp_oauth_fail', $message, time() + 120, '/'); //Expires in two minutes
+        return new NoCacheRedirectRestResponse($this->getLogoutRoute() . '?redirect_uri=' . urlencode($redirect));
     }
 }

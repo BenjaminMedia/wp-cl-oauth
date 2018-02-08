@@ -9,8 +9,8 @@ class ComposerStaticInitfd860d0b0f060b83f3af0e2a9b62e404
     public static $files = array (
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
-        '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -30,7 +30,7 @@ class ComposerStaticInitfd860d0b0f060b83f3af0e2a9b62e404
         ),
         'B' => 
         array (
-            'Bonnier\\WP\\ClOauth\\' => 19,
+            'Bonnier\\WP\\OAuth\\' => 17,
         ),
     );
 
@@ -55,7 +55,7 @@ class ComposerStaticInitfd860d0b0f060b83f3af0e2a9b62e404
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'Bonnier\\WP\\ClOauth\\' => 
+        'Bonnier\\WP\\OAuth\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

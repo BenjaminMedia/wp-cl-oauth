@@ -11,6 +11,7 @@ use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
+use UnexpectedValueException;
 
 class CommonLoginProvider extends AbstractProvider
 {
@@ -88,7 +89,20 @@ class CommonLoginProvider extends AbstractProvider
     {
         return sprintf('%s/token', $this->endpoint);
     }
-
+    
+    /**
+     * @param AccessToken $token
+     * @return ResourceOwnerInterface|null
+     */
+    public function getResourceOwner(AccessToken $token)
+    {
+        try {
+            return parent::getResourceOwner($token);
+        } catch(UnexpectedValueException $e) {
+            return null;
+        }
+    }
+    
     /**
      * Returns the URL for requesting the resource owner's details.
      *

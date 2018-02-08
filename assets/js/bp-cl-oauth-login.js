@@ -22,6 +22,10 @@
         }
         return "";
     }
+    
+    function deleteCookie(cname) {
+        document.cookie = cname + "=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/";
+    }
 
     var loginBtn = document.getElementById('user-navigation-btn');
     var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
@@ -40,5 +44,11 @@
     } else {
         loginBtn.setAttribute('href', getLoginUrl());
         mobileLoginBtn.setAttribute('href', getLoginUrl());
+    }
+    window.onload = function() {
+        if (getCookie('bp_oauth_fail')) {
+            alert(getCookie('bp_oauth_fail').replace(/\+/g, ' '));
+            deleteCookie('bp_oauth_fail');
+        }
     }
 })();
