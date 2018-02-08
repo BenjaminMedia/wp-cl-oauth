@@ -45,8 +45,10 @@
         loginBtn.setAttribute('href', getLoginUrl());
         mobileLoginBtn.setAttribute('href', getLoginUrl());
     }
-    if(getCookie('bp_oauth_fail')) {
-        alert(getCookie('bp_oauth_fail').replace(/\+/g, ' '));
-        deleteCookie('bp_oauth_fail');
+    window.onload = function() {
+        if (getCookie('bp_oauth_fail')) {
+            alert(getCookie('bp_oauth_fail').replace(/\+/g, ' '));
+            deleteCookie('bp_oauth_fail');
+        }
     }
 })();
