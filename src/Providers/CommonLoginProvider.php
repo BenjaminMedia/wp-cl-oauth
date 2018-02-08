@@ -62,7 +62,7 @@ class CommonLoginProvider extends AbstractProvider
     {
         return sprintf(
             '%s/user/edit?access_token=%s&callbackurl=%s',
-            preg_replace('#/oauth$#', '', $this->endpoint),
+            preg_replace('#/oauth$#', '', $this->endpoint), /* remove /oauth from end of string */
             urlencode(AccessTokenService::getFromStorage()->getToken() ?? null),
             urlencode($redirect_uri)
         );
@@ -72,7 +72,7 @@ class CommonLoginProvider extends AbstractProvider
     {
         return sprintf(
             '%s/user/delete?access_token=%s',
-            preg_replace('#/oauth$#', '', $this->endpoint),
+            preg_replace('#/oauth$#', '', $this->endpoint), /* remove /oauth from end of string */
             urlencode(AccessTokenService::getFromStorage()->getToken() ?? null)
         );
     }
