@@ -39,8 +39,9 @@
         mobileLoginBtn.setAttribute('href', getLogoutUrl());
         var mobileLoginBtnSpan = mobileLoginBtn.getElementsByTagName('span')[0];
         if(typeof mobileLoginBtnSpan !== 'undefined') {
-            mobileLoginBtnSpan.innerHTML = 'Logout';
+          loginBtnSpan.innerHTML = getCookie('bp_oauth_username');
         }
+        mobileLoginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
     } else {
         loginBtn.setAttribute('href', getLoginUrl());
         mobileLoginBtn.setAttribute('href', getLoginUrl());
