@@ -106,8 +106,12 @@ class UserRepository
      * @param AccessToken $accessToken
      * @return ResourceOwnerInterface|null
      */
-    public function getUserByAccessToken(AccessToken $accessToken)
+    public function getUserByAccessToken(?AccessToken $accessToken)
     {
-        return WpOAuth::instance()->getOauthProvider()->getResourceOwner($accessToken);
+        if ($accessToken) {
+            return WpOAuth::instance()->getOauthProvider()->getResourceOwner($accessToken);
+        }
+
+        return null;
     }
 }
