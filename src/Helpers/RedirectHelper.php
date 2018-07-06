@@ -2,7 +2,6 @@
 
 namespace Bonnier\WP\OAuth\Helpers;
 
-
 class RedirectHelper
 {
     /**
@@ -10,12 +9,12 @@ class RedirectHelper
      * and disable as much cache as possible
      * and only make temporary redirects.
      *
-     * @param $to
+     * @param $toLocation
      */
-    public static function redirect($to)
+    public static function redirect($toLocation)
     {
         NoCacheHeader::set();
-        header(sprintf('Location: %s', $to), true, 302);
+        header(sprintf('Location: %s', $toLocation), true, 302);
         exit();
     }
 }

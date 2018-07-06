@@ -98,7 +98,7 @@ class CommonLoginProvider extends AbstractProvider
     {
         try {
             return parent::getResourceOwner($token);
-        } catch(UnexpectedValueException $e) {
+        } catch (UnexpectedValueException $e) {
             return null;
         }
     }
@@ -138,11 +138,11 @@ class CommonLoginProvider extends AbstractProvider
             $response = $this->getHttpClient()->send($request, [
                 'form_params' => ['subscription_number' => $subscriptionNumber]
             ]);
-        } catch(GuzzleException $e) {
+        } catch (GuzzleException $e) {
             return false;
         }
         $result = json_decode($response->getBody()->getContents());
-        if($result && 'success' == $result->status) {
+        if ($result && 'success' == $result->status) {
             return $result->subscription_number;
         }
         
@@ -159,7 +159,7 @@ class CommonLoginProvider extends AbstractProvider
      */
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        if(isset($data['error'])) {
+        if (isset($data['error'])) {
             throw new IdentityProviderException(
                 $data['error'] ?: $response->getReasonPhrase(),
                 $response->getStatusCode(),
@@ -183,7 +183,7 @@ class CommonLoginProvider extends AbstractProvider
 
     private function getRedirectUri()
     {
-        if(function_exists('pll_home_url')) {
+        if (function_exists('pll_home_url')) {
             $homeUrl = pll_home_url();
         } else {
             $homeUrl = home_url('/');

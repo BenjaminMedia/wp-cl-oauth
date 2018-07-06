@@ -31,7 +31,7 @@ class Routes
     public function __construct()
     {
 
-        if(function_exists('pll_home_url')) {
+        if (function_exists('pll_home_url')) {
             $this->homeUrl = pll_home_url();
         } else {
             $this->homeUrl = home_url('/');
@@ -61,12 +61,13 @@ class Routes
      * The function that handles the user login request
      *
      * @param WP_REST_Request $request
+     * @return NoCacheRedirectRestResponse
      */
     public function login(WP_REST_Request $request)
     {
         $redirect_uri = urldecode($request->get_param('redirect_uri') ?: $this->homeUrl);
 
-        if(AccessTokenService::isValid()) {
+        if (AccessTokenService::isValid()) {
             return new NoCacheRedirectRestResponse($redirect_uri);
         }
 
@@ -82,10 +83,11 @@ class Routes
      * The function that handles the OAuth service callback request
      *
      * @param WP_REST_Request $request
+     * @return NoCacheRedirectRestResponse
      */
     public function callback(WP_REST_Request $request)
     {
-        if(!$this->validateState($request->get_param('state') ?? null)) {
+        if (!$this->validateState($request->get_param('state') ?? null)) {
             // Request has been tinkered with - let's forget about it and return home.
             return new NoCacheRedirectRestResponse($this->homeUrl);
         }
@@ -96,7 +98,7 @@ class Routes
 
         $redirect = $_SESSION['oauth2redirect'] ?? $this->homeUrl;
         
-        if(WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
+        if (WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
             AccessTokenService::setToStorage($accessToken);
             return new NoCacheRedirectRestResponse($redirect);
         } else {
@@ -108,6 +110,7 @@ class Routes
      * The function that handles the user logout request
      *
      * @param WP_REST_Request $request
+     * @return NoCacheRedirectRestResponse
      */
     public function logout(WP_REST_Request $request)
     {
@@ -123,8 +126,8 @@ class Routes
     public function subscription(WP_REST_Request $request)
     {
         $subNo = $request->get_param('no');
-        if($subNo) {
-            if(WpOAuth::instance()->getOauthProvider()->updateSubscriptionNumber($subNo)) {
+        if ($subNo) {
+            if (WpOAuth::instance()->getOauthProvider()->updateSubscriptionNumber($subNo)) {
                 return new WP_REST_Response(['status' => 'OK']);
             }
         }
@@ -146,7 +149,7 @@ class Routes
     {
         return sprintf(
             '%s/%s',
-            trim($this->homeUrl,'/'),
+            trim($this->homeUrl, '/'),
             trim($this->getRoute($route), '/')
         );
     }
@@ -186,7 +189,7 @@ class Routes
     private function triggerLoginFailure($redirect)
     {
         $message = 'An error occured during login - please try again.';
-        if(function_exists('pll__') && function_exists('pll_register_string')) {
+        if (function_exists('pll__') && function_exists('pll_register_string')) {
             pll_register_string($message, $message);
             $message = pll__($message);
         }

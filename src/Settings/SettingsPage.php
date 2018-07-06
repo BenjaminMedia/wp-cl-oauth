@@ -2,7 +2,6 @@
 
 namespace Bonnier\WP\OAuth\Settings;
 
-use Exception;
 use PLL_Language;
 
 class SettingsPage
@@ -169,15 +168,14 @@ class SettingsPage
 
         $field = $this->settingsFields[$function];
         $this->create_settings_field($field, $function);
-
     }
 
     public function get_setting_value($settingKey, $locale = null)
     {
-        if(is_null($locale)) {
+        if (is_null($locale)) {
             $locale = $this->get_current_locale();
         }
-        if(!$this->settingsValues) {
+        if (!$this->settingsValues) {
             $this->settingsValues = get_option(self::SETTINGS_KEY);
         }
 
@@ -286,7 +284,6 @@ class SettingsPage
         }
 
         return [];
-
     }
 
     private function create_settings_field($field, $fieldKey)
@@ -309,7 +306,8 @@ class SettingsPage
             $options = $this->get_select_field_options($field);
             foreach ($options as $option) {
                 $selected = ($option['system_key'] === $fieldValue) ? 'selected' : '';
-                $fieldOutput .= "<option value='" . $option['system_key'] . "' $selected >" . $option['system_key'] . "</option>";
+                $fieldOutput .= "<option value='" . $option['system_key'] . "' $selected >" .
+                    $option['system_key'] . "</option>";
             }
             $fieldOutput .= "</select>";
         }
@@ -318,5 +316,4 @@ class SettingsPage
             print $fieldOutput;
         }
     }
-
 }
