@@ -25,14 +25,16 @@ class AccessTokenService
     }
     
     /**
-     * @return AccessToken|null
+     * @return AccessToken
      */
     public static function getFromStorage()
     {
         if ($accessToken = self::getTokenFromCookie()) {
             return self::refreshToken($accessToken);
         }
-        return null;
+        return new AccessToken([
+            'access_token' => null
+        ]);
     }
     
     public static function isValid()
@@ -128,9 +130,13 @@ class AccessTokenService
         $accessToken = stripslashes($accessToken);
     
         $token = json_decode($accessToken, $associativeArray = true);
-        if(json_last_error() !== JSON_ERROR_NONE) {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-            RedirectHelper::redirect(WpOAuth::instance()->getRoutes()->getLogoutRoute() . '?redirect_uri=' . urlencode($protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ?
+                "https://" : "http://";
+            RedirectHelper::redirect(
+                WpOAuth::instance()->getRoutes()->getLogoutRoute() .
+                '?redirect_uri=' . urlencode($protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])
+            );
         }
     
         return new AccessToken($token);
@@ -144,7 +150,7 @@ class AccessTokenService
         
         if ($refreshToken = $accessToken->getRefreshToken()) {
             $refreshedAccessToken = WpOAuth::instance()->getOauthProvider()->getAccessToken('refresh_token', [
-                'refresh_token' => $accessToken->getRefreshToken()
+                'refresh_token' => $refreshToken
             ]);
             
             if ($refreshedAccessToken && $refreshedAccessToken->getToken()) {

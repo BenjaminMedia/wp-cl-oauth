@@ -1,12 +1,9 @@
 <?php
+
 namespace Bonnier\WP\OAuth\Repositories;
 
-use Bonnier\WP\OAuth\Helpers\Base64;
-use Bonnier\WP\OAuth\Http\Client;
 use Bonnier\WP\OAuth\Providers\CommonLoginResourceOwner;
 use Bonnier\WP\OAuth\Services\AccessTokenService;
-use Bonnier\WP\OAuth\Services\CommonLoginOAuth;
-use Bonnier\WP\OAuth\WpClOAuth;
 use Bonnier\WP\OAuth\WpOAuth;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
@@ -25,16 +22,16 @@ class UserRepository
      */
     public function getUser()
     {
-        if($this->user) {
+        if ($this->user) {
             return $this->user;
         }
 
-        if($user = $this->getUserByAccessToken(AccessTokenService::getFromStorage())){
+        if ($user = $this->getUserByAccessToken(AccessTokenService::getFromStorage())) {
             $this->user = $user;
             return $user;
         }
 
-        if($user = $this->getUserFromStorage()) {
+        if ($user = $this->getUserFromStorage()) {
             $this->user = $user;
             return $user;
         }
@@ -45,7 +42,7 @@ class UserRepository
     public function setUserFromAccessToken(AccessToken $accessToken)
     {
         $this->user = WpOAuth::instance()->getOauthProvider()->getResourceOwner($accessToken);
-        if($this->user) {
+        if ($this->user) {
             wp_cache_set(
                 md5($accessToken->getToken()),
                 json_encode($this->user->toArray()),
@@ -75,20 +72,21 @@ class UserRepository
     private function getUserFromStorage()
     {
         $accessToken = AccessTokenService::getFromStorage();
-        $accessTokenKey = md5($accessToken->getToken());
-        if($cachedUser = wp_cache_get($accessTokenKey, WpOAuth::TEXT_DOMAIN ) ){
-            return new CommonLoginResourceOwner(json_decode($cachedUser));
-        }
-        if($user = self::getUserByAccessToken($accessToken))
-        {
-            wp_cache_set(
-                $accessTokenKey,
-                json_encode($user->toArray()),
-                WpOAuth::TEXT_DOMAIN,
-                self::getUserCacheLifeTime()
-            );
+        if ($token = $accessToken->getToken()) {
+            $accessTokenKey = md5($token);
+            if ($cachedUser = wp_cache_get($accessTokenKey, WpOAuth::TEXT_DOMAIN)) {
+                return new CommonLoginResourceOwner(json_decode($cachedUser));
+            }
+            if ($user = self::getUserByAccessToken($accessToken)) {
+                wp_cache_set(
+                    $accessTokenKey,
+                    json_encode($user->toArray()),
+                    WpOAuth::TEXT_DOMAIN,
+                    self::getUserCacheLifeTime()
+                );
 
-            return $user;
+                return $user;
+            }
         }
         return false;
     }

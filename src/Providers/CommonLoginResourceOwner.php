@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Bonnier\WP\OAuth\Providers;
-
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Tool\ArrayAccessorTrait;
