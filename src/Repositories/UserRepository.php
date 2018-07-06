@@ -71,9 +71,8 @@ class UserRepository
 
     private function getUserFromStorage()
     {
-        $accessToken = AccessTokenService::getFromStorage();
-        if ($token = $accessToken->getToken()) {
-            $accessTokenKey = md5($token);
+        if ($accessToken = AccessTokenService::getFromStorage()) {
+            $accessTokenKey = md5($accessToken->getToken());
             if ($cachedUser = wp_cache_get($accessTokenKey, WpOAuth::TEXT_DOMAIN)) {
                 return new CommonLoginResourceOwner(json_decode($cachedUser));
             }

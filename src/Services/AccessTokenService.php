@@ -32,9 +32,7 @@ class AccessTokenService
         if ($accessToken = self::getTokenFromCookie()) {
             return self::refreshToken($accessToken);
         }
-        return new AccessToken([
-            'access_token' => null
-        ]);
+        return null;
     }
     
     public static function isValid()
