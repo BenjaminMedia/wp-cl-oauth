@@ -159,7 +159,8 @@ class CommonLoginProvider extends AbstractProvider
      */
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        if (isset($data['error'])) {
+        // Do not throw the exception if logged in editor / administrator to avoid error when previewing post
+        if (isset($data['error']) && !current_user_can('editor') && !current_user_can('administrator')) {
             throw new IdentityProviderException(
                 $data['error'] ?: $response->getReasonPhrase(),
                 $response->getStatusCode(),
