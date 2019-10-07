@@ -64,6 +64,17 @@ class UserRepository
         return AccessTokenService::isValid();
     }
 
+    /**
+     * Check if the current user is a subscriber
+     * @return bool
+     */
+    public function isSubscriber()
+    {
+        if($user = $this->getUser()) {
+            return in_array('subscribers', $user->getRoles());
+        }
+    }
+
     public function getAccessToken()
     {
         return AccessTokenService::getFromStorage();
