@@ -51,6 +51,11 @@ class CommonLoginResourceOwner implements ResourceOwnerInterface
         return $this->getValueByKey($this->response, 'created_at');
     }
 
+    public function getRoles()
+    {
+        return $this->getValueByKey($this->response, 'roles');
+    }
+
     /**
      * Return all of the owner details available as an array.
      *
