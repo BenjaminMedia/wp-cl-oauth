@@ -31,10 +31,6 @@
     var mobileLoginBtn = document.getElementById('user-mobile-navigation-btn');
 
     if (getCookie('bp_oauth_token')) {
-        var loginBtnSpan = loginBtn.getElementsByTagName('span')[0];
-        if(typeof loginBtnSpan !== 'undefined') {
-            loginBtnSpan.innerHTML = getCookie('bp_oauth_username').replace('+', ' ');
-        }
         loginBtn.setAttribute('href', loginBtn.getAttribute('data-profile'));
         mobileLoginBtn.setAttribute('href', getLogoutUrl());
         var mobileLoginBtnSpan = mobileLoginBtn.getElementsByTagName('span')[0];
