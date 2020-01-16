@@ -45,6 +45,16 @@ class CommonLoginResourceOwner implements ResourceOwnerInterface
     {
         return $this->getValueByKey($this->response, 'subscription_number');
     }
+    
+    public function getMagazineCode()
+    {
+        return $this->getValueByKey($this->response, 'magazine_code');
+    }
+
+    public function getMagazineCodeAllowed()
+    {
+        return $this->getValueByKey($this->response, 'magazine_code_allowed');
+    }
 
     public function getCreatedAt()
     {
