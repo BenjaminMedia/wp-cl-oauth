@@ -4,7 +4,7 @@ namespace Bonnier\WP\OAuth\Providers;
 
 use Bonnier\WP\OAuth\Services\AccessTokenService;
 use Bonnier\WP\OAuth\WpOAuth;
-use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ClientException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
@@ -138,15 +138,10 @@ class CommonLoginProvider extends AbstractProvider
             $response = $this->getHttpClient()->send($request, [
                 'form_params' => ['subscription_number' => $subscriptionNumber]
             ]);
-        } catch (GuzzleException $e) {
-            return false;
+        } catch (ClientException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents());
         }
-        $result = json_decode($response->getBody()->getContents());
-        if ($result && 'success' == $result->status) {
-            return $result->subscription_number;
-        }
-        
-        return false;
+        return json_decode($response->getBody()->getContents());
     }
 
     /**
