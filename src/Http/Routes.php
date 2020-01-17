@@ -23,7 +23,7 @@ class Routes
     const CALLBACK_ROUTE = '/oauth/callback';
 
     const LOGOUT_ROUTE = '/oauth/logout';
-    
+
     const SUBSCRIPTION_ROUTE = '/subscription_number';
 
     private $homeUrl;
@@ -75,7 +75,7 @@ class Routes
 
         $_SESSION['oauth2state'] = WpOAuth::instance()->getOauthProvider()->getState();
         $_SESSION['oauth2redirect'] = $redirect_uri;
-        
+
         return new NoCacheRedirectRestResponse($authUrl);
     }
 
@@ -97,7 +97,7 @@ class Routes
         ]);
 
         $redirect = $_SESSION['oauth2redirect'] ?? $this->homeUrl;
-        
+
         if (WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
             AccessTokenService::setToStorage($accessToken);
             return new NoCacheRedirectRestResponse($redirect);
@@ -119,20 +119,18 @@ class Routes
         $redirect_uri = $request->get_param('redirect_uri') ?? $this->homeUrl;
 
         $logoutUrl = WpOAuth::instance()->getOauthProvider()->getLogoutUrl($redirect_uri);
-    
+
         return new NoCacheRedirectRestResponse($logoutUrl);
     }
-    
+
     public function subscription(WP_REST_Request $request)
     {
         $subNo = $request->get_param('no');
         if ($subNo) {
-            if (WpOAuth::instance()->getOauthProvider()->updateSubscriptionNumber($subNo)) {
-                return new WP_REST_Response(['status' => 'OK']);
-            }
+            $response = WpOAuth::instance()->getOauthProvider()->updateSubscriptionNumber($subNo);
+            return new WP_REST_Response($response, $response->status);
         }
-        
-        return new WP_REST_Response(['status' => 'Failed'], 400);
+        return new WP_REST_Response('invalid input', 400);
     }
 
     public function getRoute($route)
@@ -168,7 +166,7 @@ class Routes
     {
         return $this->getRoute(static::LOGOUT_ROUTE);
     }
-    
+
     public function getSubscriptionRoute()
     {
         return $this->getRoute(static::SUBSCRIPTION_ROUTE);
@@ -185,7 +183,7 @@ class Routes
         return isset($_SESSION['oauth2state']) &&
             hash_equals($_SESSION['oauth2state'], $state);
     }
-    
+
     private function triggerLoginFailure($redirect)
     {
         $message = 'An error occured during login - please try again.';
