@@ -20,6 +20,8 @@ class Routes
 
     const LOGIN_ROUTE = '/oauth/login';
 
+    const REGISTER_ROUTE = '/oauth/register';
+
     const CALLBACK_ROUTE = '/oauth/callback';
 
     const LOGOUT_ROUTE = '/oauth/logout';
@@ -38,6 +40,10 @@ class Routes
         }
 
         add_action('rest_api_init', function () {
+            register_rest_route(self::PLUGIN_PREFIX, self::REGISTER_ROUTE, [
+                'methods' => 'GET, POST',
+                'callback' => [$this, 'register'],
+            ]);
             register_rest_route(self::PLUGIN_PREFIX, self::LOGIN_ROUTE, [
                 'methods' => 'GET, POST',
                 'callback' => [$this, 'login'],
@@ -56,6 +62,20 @@ class Routes
             ]);
         });
     }
+
+    /**
+     * The function that handles the user login request
+     *
+     * @param WP_REST_Request $request
+     * @return NoCacheRedirectRestResponse
+     */
+    public function register(WP_REST_Request $request)
+    {
+        $response = $this->login($request);
+        $response->headers['Location'] .= '&create=true';
+        return $response;
+    }
+
 
     /**
      * The function that handles the user login request
@@ -150,6 +170,11 @@ class Routes
             trim($this->homeUrl, '/'),
             trim($this->getRoute($route), '/')
         );
+    }
+
+    public function getRegisterRoute()
+    {
+        return $this->getRoute(static::REGISTER_ROUTE);
     }
 
     public function getLoginRoute()
