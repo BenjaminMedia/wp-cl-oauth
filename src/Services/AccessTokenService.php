@@ -17,7 +17,8 @@ class AccessTokenService
     
     const USERNAME_COOKIE = 'bp_oauth_username';
     
-	const DATALAYER_TRACKING_ID = 'bp_oauth_tracking_id';
+    const DATALAYER_TRACKING_ID = 'bp_oauth_tracking_id';
+	
     public static function destroyCookies()
     {
         self::deleteCookie(self::ACCESS_TOKEN_COOKIE_KEY);
