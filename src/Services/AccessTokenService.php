@@ -89,7 +89,7 @@ class AccessTokenService
         $user = WpOAuth::instance()->getUserRepo()->getUser();
         if ($user) {
             setcookie(self::USERNAME_COOKIE, $user->getFirstName(), self::cookieLifetime(), '/');
-	        setcookie(self::DATALAYER_TRACKING_ID, hash('sha256',$user->getEmail()), self::cookieLifetime(), '/');
+	    setcookie(self::DATALAYER_TRACKING_ID, hash('sha256',$user->getEmail()), self::cookieLifetime(), '/');
         }
     }
     
