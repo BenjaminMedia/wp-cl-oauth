@@ -120,10 +120,10 @@ class Routes
 
         if (WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
             AccessTokenService::setToStorage($accessToken);
-            return new NoCacheRedirectRestResponse($redirect);
-        } else {
-            return $this->triggerLoginFailure($redirect);
+            // Add 'cl-login=success' in url for datalayer.js to fetch common-login login successful action
+            return new NoCacheRedirectRestResponse($redirect.'?cl-login=success');
         }
+	    return $this->triggerLoginFailure($redirect);
     }
 
     /**
