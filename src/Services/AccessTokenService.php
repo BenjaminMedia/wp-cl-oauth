@@ -17,11 +17,13 @@ class AccessTokenService
     
     const USERNAME_COOKIE = 'bp_oauth_username';
     
+	const DATALAYER_TRACKING_ID = 'bp_oauth_tracking_id';
     public static function destroyCookies()
     {
         self::deleteCookie(self::ACCESS_TOKEN_COOKIE_KEY);
         self::deleteCookie(self::NO_CACHE_COOKIE);
         self::deleteCookie(self::USERNAME_COOKIE);
+        self::deleteCookie(self::DATALAYER_TRACKING_ID);
     }
     
     /**
@@ -86,6 +88,7 @@ class AccessTokenService
         $user = WpOAuth::instance()->getUserRepo()->getUser();
         if ($user) {
             setcookie(self::USERNAME_COOKIE, $user->getFirstName(), self::cookieLifetime(), '/');
+	        setcookie(self::DATALAYER_TRACKING_ID, hash('sha256',$user->getEmail()), self::cookieLifetime(), '/');
         }
     }
     
