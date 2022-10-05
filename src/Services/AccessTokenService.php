@@ -25,6 +25,13 @@ class AccessTokenService
         self::deleteCookie(self::NO_CACHE_COOKIE);
         self::deleteCookie(self::USERNAME_COOKIE);
         self::deleteCookie(self::DATALAYER_TRACKING_ID);
+        self::destroyOtherBigCookies();
+    }
+
+    public static function destroyOtherBigCookies()
+    {
+        self::deleteCookie('CookieInformationConsent');
+        self::deleteCookie('laravel_token');
     }
     
     /**
