@@ -30,8 +30,17 @@ class AccessTokenService
 
     public static function destroyOtherBigCookies()
     {
-        self::deleteCookie('CookieInformationConsent');
+        // Delete all cookies that start with 'CookieInformationConsent'
+        foreach ($_COOKIE as $cookieKey => $cookieValue) {
+            if (stripos($cookieKey, 'CookieInformationConsent') !== false) {
+                self::deleteCookie($cookieKey);
+            }
+        }
+        self::deleteCookie('CookieInformationConfig');
         self::deleteCookie('laravel_token');
+        self::deleteCookie('_pprv');
+        self::deleteCookie('laravel_token', '.komputer.dk');
+        self::deleteCookie('_pprv', '.komputer.dk');
     }
     
     /**
