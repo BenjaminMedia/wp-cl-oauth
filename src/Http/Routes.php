@@ -87,8 +87,6 @@ class Routes
     {
         $redirect_uri = urldecode($request->get_param('redirect_uri') ?: $this->homeUrl);
 
-        AccessTokenService::destroyOtherBigCookies();
-
         if (AccessTokenService::isValid()) {
             return new NoCacheRedirectRestResponse($redirect_uri);
         }
@@ -119,8 +117,6 @@ class Routes
         ]);
 
         $redirect = $_SESSION['oauth2redirect'] ?? $this->homeUrl;
-
-        AccessTokenService::destroyOtherBigCookies();
 
         if (WpOAuth::instance()->getUserRepo()->setUserFromAccessToken($accessToken)) {
             AccessTokenService::setToStorage($accessToken);

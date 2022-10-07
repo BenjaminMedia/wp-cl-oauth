@@ -25,22 +25,6 @@ class AccessTokenService
         self::deleteCookie(self::NO_CACHE_COOKIE);
         self::deleteCookie(self::USERNAME_COOKIE);
         self::deleteCookie(self::DATALAYER_TRACKING_ID);
-        self::destroyOtherBigCookies();
-    }
-
-    public static function destroyOtherBigCookies()
-    {
-        // Delete all cookies that start with 'CookieInformationConsent'
-        foreach ($_COOKIE as $cookieKey => $cookieValue) {
-            if (stripos($cookieKey, 'CookieInformationConsent') !== false) {
-                self::deleteCookie($cookieKey);
-            }
-        }
-        self::deleteCookie('CookieInformationConfig');
-        self::deleteCookie('laravel_token');
-        self::deleteCookie('_pprv');
-        self::deleteCookie('laravel_token', '.komputer.dk');
-        self::deleteCookie('_pprv', '.komputer.dk');
     }
     
     /**
@@ -75,7 +59,7 @@ class AccessTokenService
     private static function getTokenFromCookie()
     {
         if (isset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY])) {
-            return self::convertToInstance($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] ?? null);
+            return self::convertToInstance(base64_decode(gzuncompress($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY])) ?? null);
         }
         
         return null;
@@ -90,7 +74,7 @@ class AccessTokenService
     {
         setcookie(
             self::ACCESS_TOKEN_COOKIE_KEY,
-            json_encode($accessToken->jsonSerialize()),
+            base64_encode(gzcompress(json_encode($accessToken->jsonSerialize(),JSON_UNESCAPED_UNICODE),9)),
             self::cookieLifetime(),
             '/'
         );
