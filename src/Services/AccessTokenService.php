@@ -58,8 +58,13 @@ class AccessTokenService
      */
     private static function getTokenFromCookie()
     {
-        if (isset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY])) {
-            return self::convertToInstance(base64_decode(gzuncompress($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY])) ?? null);
+        if (isset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY]) ?? $_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] != '') {
+            $cookieValue = $_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY];
+            $cookieValueUncompressed = @gzuncompress($cookieValue);
+            if ($cookieValueUncompressed !== false) {
+                $cookieValue = base64_decode($cookieValueUncompressed);
+            }
+            return self::convertToInstance($cookieValue);
         }
         
         return null;
