@@ -32,8 +32,14 @@ class AccessTokenService
     /** error 520 fix !!! */
     public static function destroyOtherBigCookies()
     {
+        // size:783
         self::deleteCookie('CookieInformationConsent');
+        // size:656
         self::deleteCookie('6c728b4e6162d41c424383edf7c912c1');
+        // size:549 this is only created af 2. visit to login! it seems to work if we delete this also.
+        self::deleteCookie('laravel_token');
+        // size:382 this seems to be crearted from gtm.
+        self::deleteCookie('_pprv');
     }
     
     /**
