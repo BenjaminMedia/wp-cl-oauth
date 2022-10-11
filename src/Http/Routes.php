@@ -87,6 +87,8 @@ class Routes
     {
         $redirect_uri = urldecode($request->get_param('redirect_uri') ?: $this->homeUrl);
 
+        AccessTokenService::destroyOtherBigCookies();
+
         if (AccessTokenService::isValid()) {
             return new NoCacheRedirectRestResponse($redirect_uri);
         }
@@ -107,6 +109,8 @@ class Routes
      */
     public function callback(WP_REST_Request $request)
     {
+        AccessTokenService::destroyOtherBigCookies();
+        
         if (!$this->validateState($request->get_param('state') ?? null)) {
             // Request has been tinkered with - let's forget about it and return home.
             return new NoCacheRedirectRestResponse($this->homeUrl);
