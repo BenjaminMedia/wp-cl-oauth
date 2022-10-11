@@ -32,8 +32,12 @@ class AccessTokenService
     /** error 520 fix !!! */
     public static function destroyOtherBigCookies()
     {
+        // size:783
         self::deleteCookie('CookieInformationConsent');
+        // size:656
         self::deleteCookie('6c728b4e6162d41c424383edf7c912c1');
+        // size:382 this seems to be crearted from gtm.
+        self::deleteCookie('_pprv');
     }
     
     /**
