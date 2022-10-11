@@ -25,6 +25,15 @@ class AccessTokenService
         self::deleteCookie(self::NO_CACHE_COOKIE);
         self::deleteCookie(self::USERNAME_COOKIE);
         self::deleteCookie(self::DATALAYER_TRACKING_ID);
+
+        self::destroyOtherBigCookies();
+    }
+
+    /** error 520 fix !!! */
+    public static function destroyOtherBigCookies()
+    {
+        self::deleteCookie('CookieInformationConsent');
+        self::deleteCookie('6c728b4e6162d41c424383edf7c912c1');
     }
     
     /**
@@ -60,10 +69,6 @@ class AccessTokenService
     {
         if (isset($_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY]) ?? $_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY] != '') {
             $cookieValue = $_COOKIE[self::ACCESS_TOKEN_COOKIE_KEY];
-            $cookieValueUncompressed = @gzuncompress($cookieValue);
-            if ($cookieValueUncompressed !== false) {
-                $cookieValue = base64_decode($cookieValueUncompressed);
-            }
             return self::convertToInstance($cookieValue);
         }
         
@@ -79,7 +84,7 @@ class AccessTokenService
     {
         setcookie(
             self::ACCESS_TOKEN_COOKIE_KEY,
-            base64_encode(gzcompress(json_encode($accessToken->jsonSerialize(),JSON_UNESCAPED_UNICODE),9)),
+            json_encode($accessToken->jsonSerialize()),
             self::cookieLifetime(),
             '/'
         );
@@ -94,7 +99,7 @@ class AccessTokenService
         $user = WpOAuth::instance()->getUserRepo()->getUser();
         if ($user) {
             setcookie(self::USERNAME_COOKIE, $user->getFirstName(), self::cookieLifetime(), '/');
-	    setcookie(self::DATALAYER_TRACKING_ID, hash('sha256',$user->getEmail()), self::cookieLifetime(), '/');
+	        setcookie(self::DATALAYER_TRACKING_ID, hash('sha256',$user->getEmail()), self::cookieLifetime(), '/');
         }
     }
     
