@@ -34,6 +34,8 @@ class AccessTokenService
     {
         // size:783
         self::deleteCookie('CookieInformationConsent');
+        // size:1700
+        self::deleteCookie('didomi_token');
         // size:656
         self::deleteCookie('6c728b4e6162d41c424383edf7c912c1');
         // size:382 this seems to be crearted from gtm.
